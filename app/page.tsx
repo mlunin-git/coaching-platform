@@ -9,28 +9,30 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const supabase = getSupabaseClient();
+    const checkAuth = async () => {
+      const supabase = getSupabaseClient();
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         // Get user role from database
-        (supabase as any)
+        const { data } = await (supabase as any)
           .from("users")
           .select("role")
           .eq("id", session.user.id)
-          .single()
-          .then(({ data }: any) => {
-            if (data?.role === "coach") {
-              router.push("/coach/clients");
-            } else if (data?.role === "client") {
-              router.push("/client/tasks");
-            }
-          });
+          .single();
+
+        if (data?.role === "coach") {
+          router.push("/coach/clients");
+        } else if (data?.role === "client") {
+          router.push("/client/tasks");
+        }
       } else {
         router.push("/auth/login");
       }
       setLoading(false);
-    });
+    };
+
+    checkAuth();
   }, [router]);
 
   if (loading) {

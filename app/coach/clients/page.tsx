@@ -16,11 +16,10 @@ export default function ClientsPage() {
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
 
-  const supabase = getSupabaseClient();
-
   const loadClients = useCallback(async () => {
     setLoading(true);
     try {
+      const supabase = getSupabaseClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -39,7 +38,7 @@ export default function ClientsPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
     loadClients();
@@ -51,6 +50,7 @@ export default function ClientsPage() {
     setError("");
 
     try {
+      const supabase = getSupabaseClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();

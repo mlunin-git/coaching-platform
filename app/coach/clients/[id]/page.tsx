@@ -39,10 +39,9 @@ export default function ClientDetailPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
-  const supabase = getSupabaseClient();
-
   const loadClientInfo = useCallback(async () => {
     try {
+      const supabase = getSupabaseClient();
       const { data: clientRaw, error: clientError } = await supabase
         .from("clients")
         .select("*")
@@ -71,11 +70,12 @@ export default function ClientDetailPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load client info");
     }
-  }, [clientId, supabase]);
+  }, [clientId]);
 
   const loadTasks = useCallback(async () => {
     setLoading(true);
     try {
+      const supabase = getSupabaseClient();
       const { data, error: tasksError } = await supabase
         .from("client_tasks")
         .select(
@@ -112,7 +112,7 @@ export default function ClientDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [clientId, supabase]);
+  }, [clientId]);
 
   useEffect(() => {
     loadClientInfo();
@@ -125,6 +125,7 @@ export default function ClientDetailPage() {
     setError("");
 
     try {
+      const supabase = getSupabaseClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -171,6 +172,7 @@ export default function ClientDetailPage() {
     const newStatus = task.status === "pending" ? "completed" : "pending";
 
     try {
+      const supabase = getSupabaseClient();
       const { error: updateError } = await (supabase as any)
         .from("client_tasks")
         .update({

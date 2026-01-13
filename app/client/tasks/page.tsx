@@ -20,12 +20,11 @@ export default function ClientTasksPage() {
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState<string | null>(null);
 
-  const supabase = getSupabaseClient();
-
   const loadTasks = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
+      const supabase = getSupabaseClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -86,7 +85,7 @@ export default function ClientTasksPage() {
     } finally {
       setLoading(false);
     }
-  }, [router, supabase]);
+  }, [router]);
 
   useEffect(() => {
     loadTasks();
@@ -98,6 +97,7 @@ export default function ClientTasksPage() {
     setUpdating(task.id);
 
     try {
+      const supabase = getSupabaseClient();
       // Get client_task id (need to fetch again or track it)
       const {
         data: { user },
