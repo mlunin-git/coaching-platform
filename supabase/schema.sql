@@ -48,6 +48,15 @@ ALTER TABLE client_tasks ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can read their own profile" ON users
   FOR SELECT USING (auth.uid() = id);
 
+CREATE POLICY "Coaches can read their clients' profiles" ON users
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM clients
+      WHERE clients.user_id = users.id
+      AND clients.coach_id = auth.uid()
+    )
+  );
+
 CREATE POLICY "Users can update their own profile" ON users
   FOR UPDATE USING (auth.uid() = id);
 
