@@ -9,8 +9,8 @@ This guide helps you run the coaching platform on your computer.
 - **Node.js 18+**: Download from https://nodejs.org (use LTS version)
 - **Git**: Download from https://git-scm.com
 - **A code editor**: VS Code recommended (https://code.visualstudio.com)
-- **Supabase account**: Already created ✅
-- **Vercel account**: Already created ✅
+- **Supabase account**: Already created
+- **Vercel account**: Already created
 
 ---
 

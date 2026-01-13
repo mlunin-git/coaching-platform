@@ -23,15 +23,15 @@ export default function ClientLayout({
         return;
       }
 
-      // Get user profile
+      // Get user profile by auth_user_id
       supabase
         .from("users")
         .select("*")
-        .eq("id", session.user.id)
+        .eq("auth_user_id", session.user.id)
         .single()
         .then(({ data, error }) => {
           const userData = data as Database["public"]["Tables"]["users"]["Row"] | null;
-          if (error || !userData || userData.role !== "client") {
+          if (error || !userData || userData.role !== "client" || !userData.has_auth_access) {
             router.push("/auth/login");
           } else {
             setUser(userData);

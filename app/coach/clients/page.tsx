@@ -6,15 +6,24 @@ import { getSupabaseClient } from "@/lib/supabase";
 import type { Database } from "@/lib/database.types";
 
 type Client = Database["public"]["Tables"]["clients"]["Row"];
+type User = Database["public"]["Tables"]["users"]["Row"];
+
+interface ClientWithUser extends Client {
+  email?: string | null;
+  client_identifier?: string | null;
+  has_auth_access?: boolean;
+}
 
 export default function ClientsPage() {
   const router = useRouter();
-  const [clients, setClients] = useState<Client[]>([]);
+  const [clients, setClients] = useState<ClientWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [newClientName, setNewClientName] = useState("");
   const [newClientEmail, setNewClientEmail] = useState("");
+  const [useEmail, setUseEmail] = useState(true);
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
+  const [generatedClientId, setGeneratedClientId] = useState("");
 
   const loadClients = useCallback(async () => {
     setLoading(true);
@@ -26,13 +35,44 @@ export default function ClientsPage() {
 
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from("clients")
-        .select("*")
-        .eq("coach_id", user.id);
+      // Get coach's user record
+      const { data: coachUser, error: coachError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .single();
 
-      if (error) throw error;
-      setClients(data || []);
+      if (coachError || !coachUser) {
+        setError("Coach profile not found");
+        return;
+      }
+
+      // Join clients with users to get email/identifier info
+      const { data, error: clientsError } = await supabase
+        .from("clients")
+        .select(
+          `
+          *,
+          user:user_id (
+            email,
+            client_identifier,
+            has_auth_access
+          )
+        `
+        )
+        .eq("coach_id", coachUser.id);
+
+      if (clientsError) throw clientsError;
+
+      // Flatten the data structure
+      const enrichedClients = (data || []).map((client: any) => ({
+        ...client,
+        email: client.user?.email,
+        client_identifier: client.user?.client_identifier,
+        has_auth_access: client.user?.has_auth_access,
+      }));
+
+      setClients(enrichedClients);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load clients");
     } finally {
@@ -48,6 +88,7 @@ export default function ClientsPage() {
     e.preventDefault();
     setAdding(true);
     setError("");
+    setGeneratedClientId("");
 
     try {
       const supabase = getSupabaseClient();
@@ -57,31 +98,76 @@ export default function ClientsPage() {
 
       if (!user) throw new Error("Not authenticated");
 
-      // Create user for client
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email: newClientEmail,
-        password: Math.random().toString(36).slice(-12), // Random password
-      });
+      // Get coach's user record
+      const { data: coachUser, error: coachError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .single();
 
-      if (signUpError) throw signUpError;
-      if (!authData.user) throw new Error("Failed to create user");
+      if (coachError || !coachUser) throw new Error("Coach not found");
 
-      // Create user profile
-      const { error: profileError } = await (supabase as any).from("users").insert({
-        id: authData.user.id,
-        email: newClientEmail,
-        name: newClientName,
-        role: "client",
-      } as any);
+      let newUserId: string;
+      let clientIdentifier: string | null = null;
 
-      if (profileError) throw profileError;
+      if (useEmail) {
+        // === CLIENT WITH EMAIL (existing flow) ===
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+          email: newClientEmail,
+          password: Math.random().toString(36).slice(-12), // Random password
+        });
+
+        if (signUpError) throw signUpError;
+        if (!authData.user) throw new Error("Failed to create auth user");
+
+        // Create user profile
+        const { data: newUser, error: profileError } = await (supabase as any)
+          .from("users")
+          .insert({
+            auth_user_id: authData.user.id,
+            email: newClientEmail,
+            name: newClientName,
+            role: "client",
+            has_auth_access: true,
+            client_identifier: null,
+          } as any)
+          .select()
+          .single();
+
+        if (profileError) throw profileError;
+        newUserId = newUser.id;
+      } else {
+        // === CLIENT WITHOUT EMAIL (new flow) ===
+        const { generateClientIdentifier } = await import("@/lib/client-id-generator");
+        clientIdentifier = await generateClientIdentifier(coachUser.id, supabase);
+
+        // Create user profile WITHOUT Supabase Auth
+        const { data: newUser, error: profileError } = await (supabase as any)
+          .from("users")
+          .insert({
+            auth_user_id: null,
+            email: null,
+            client_identifier: clientIdentifier,
+            name: newClientName,
+            role: "client",
+            has_auth_access: false,
+          } as any)
+          .select()
+          .single();
+
+        if (profileError) throw profileError;
+        newUserId = newUser.id;
+        setGeneratedClientId(clientIdentifier);
+      }
 
       // Create client record
-      const { error: clientError } = await (supabase as any).from("clients").insert({
-        coach_id: user.id,
-        user_id: authData.user.id,
-        name: newClientName,
-      } as any);
+      const { error: clientError } = await (supabase as any)
+        .from("clients")
+        .insert({
+          coach_id: coachUser.id,
+          user_id: newUserId,
+          name: newClientName,
+        } as any);
 
       if (clientError) throw clientError;
 
@@ -114,6 +200,32 @@ export default function ClientsPage() {
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Client</h3>
         <form onSubmit={handleAddClient} className="space-y-4">
+          {/* Client Type Toggle */}
+          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                checked={useEmail}
+                onChange={() => setUseEmail(true)}
+                className="w-4 h-4 text-blue-600"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                Client with email (can log in)
+              </span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                checked={!useEmail}
+                onChange={() => setUseEmail(false)}
+                className="w-4 h-4 text-blue-600"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                Client without email (view-only, managed by coach)
+              </span>
+            </label>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -130,21 +242,37 @@ export default function ClientsPage() {
               />
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Client Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={newClientEmail}
-                onChange={(e) => setNewClientEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                placeholder="john@example.com"
-              />
-            </div>
+            {/* Only show email field when useEmail is true */}
+            {useEmail && (
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Client Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={newClientEmail}
+                  onChange={(e) => setNewClientEmail(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  placeholder="john@example.com"
+                />
+              </div>
+            )}
           </div>
+
+          {/* Show generated client ID after creation */}
+          {generatedClientId && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm font-medium text-green-900">Client created successfully!</p>
+              <p className="text-sm text-green-700 mt-1">
+                Client ID: <span className="font-mono font-bold">{generatedClientId}</span>
+              </p>
+              <p className="text-xs text-green-600 mt-2">
+                This client cannot log in. All management is done through your coach dashboard.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
@@ -181,6 +309,12 @@ export default function ClientsPage() {
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Name</th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
+                    Identifier
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
+                    Login Access
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
                     Added
                   </th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
@@ -192,6 +326,22 @@ export default function ClientsPage() {
                 {clients.map((client) => (
                   <tr key={client.id} className="border-b border-gray-200 hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm text-gray-900">{client.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      <span className="font-mono text-xs">
+                        {client.email || client.client_identifier || "N/A"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {client.has_auth_access ? (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          ✓ Can log in
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          View-only
+                        </span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {new Date(client.created_at).toLocaleDateString()}
                     </td>

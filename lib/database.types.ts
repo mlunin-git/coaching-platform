@@ -4,23 +4,32 @@ export type Database = {
       users: {
         Row: {
           id: string;
-          email: string;
+          auth_user_id: string | null;
+          email: string | null;
+          client_identifier: string | null;
           role: "coach" | "client";
           name: string;
+          has_auth_access: boolean;
           created_at: string;
         };
         Insert: {
           id?: string;
-          email: string;
+          auth_user_id?: string | null;
+          email?: string | null;
+          client_identifier?: string | null;
           role: "coach" | "client";
           name: string;
+          has_auth_access?: boolean;
           created_at?: string;
         };
         Update: {
           id?: string;
-          email?: string;
+          auth_user_id?: string | null;
+          email?: string | null;
+          client_identifier?: string | null;
           role?: "coach" | "client";
           name?: string;
+          has_auth_access?: boolean;
           created_at?: string;
         };
       };

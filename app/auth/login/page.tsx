@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn, getUserProfile } from "@/lib/auth";
+import { signIn, getUserByAuthId } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,8 +20,8 @@ export default function LoginPage() {
     try {
       const data = await signIn(email, password);
 
-      // Get user profile to check role
-      const profile = await getUserProfile(data.user.id);
+      // Get user profile by auth_user_id to check role
+      const profile = await getUserByAuthId(data.user.id);
 
       if (profile.role === "coach") {
         router.push("/coach/clients");
@@ -90,12 +90,15 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="text-center text-sm">
+      <div className="text-center text-sm space-y-3">
         <p className="text-gray-600">
-          Don&apos;t have an account?{" "}
+          Are you a coach?{" "}
           <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-medium">
-            Sign up here
+            Create a coach account here
           </Link>
+        </p>
+        <p className="text-gray-600 text-xs">
+          If you're a client and don't have a login, ask your coach to create an account for you.
         </p>
       </div>
     </div>

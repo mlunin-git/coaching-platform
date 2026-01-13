@@ -10,7 +10,7 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"coach" | "client">("client");
+  const [role] = useState<"coach" | "client">("coach");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -37,27 +37,20 @@ export default function SignUpPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900">Create Account</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Create Coach Account</h2>
         <p className="text-sm text-gray-600 mt-1">
-          Join our coaching platform today
+          Join our coaching platform as a coach
+        </p>
+      </div>
+
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <p className="text-sm text-blue-900 font-medium">Coach Registration Only</p>
+        <p className="text-sm text-blue-800 mt-1">
+          This registration is for coaches only. If you're a client, your coach will create an account for you.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-            I am a
-          </label>
-          <select
-            id="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value as "coach" | "client")}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-          >
-            <option value="client">Client (Learner)</option>
-            <option value="coach">Coach</option>
-          </select>
-        </div>
 
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
