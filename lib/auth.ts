@@ -1,4 +1,7 @@
 import { getSupabaseClient } from "./supabase";
+import type { Database } from "./database.types";
+
+type User = Database["public"]["Tables"]["users"]["Row"];
 
 export async function signUp(email: string, password: string, name: string, role: "coach" | "client") {
   const supabase = getSupabaseClient();
@@ -11,12 +14,14 @@ export async function signUp(email: string, password: string, name: string, role
   if (error) throw error;
 
   // Insert user profile
-  const { error: profileError } = await supabase.from("users").insert({
-    id: data.user?.id,
-    email,
-    name,
-    role,
-  });
+  const { error: profileError } = await (supabase as any)
+    .from("users")
+    .insert({
+      id: data.user?.id,
+      email,
+      name,
+      role,
+    } as any);
 
   if (profileError) throw profileError;
 
@@ -56,12 +61,12 @@ export async function getCurrentUser() {
   return user;
 }
 
-export async function getUserProfile(userId: string) {
+export async function getUserProfile(userId: string): Promise<User> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase.from("users").select("*").eq("id", userId).single();
 
   if (error) throw error;
 
-  return data;
+  return data as User;
 }

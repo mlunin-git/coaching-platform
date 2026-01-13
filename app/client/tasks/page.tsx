@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase";
 
@@ -22,11 +22,7 @@ export default function ClientTasksPage() {
 
   const supabase = getSupabaseClient();
 
-  useEffect(() => {
-    loadTasks();
-  }, []);
-
-  async function loadTasks() {
+  const loadTasks = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -40,12 +36,13 @@ export default function ClientTasksPage() {
       }
 
       // Get client record
-      const { data: clientData, error: clientError } = await supabase
+      const { data: clientDataRaw, error: clientError } = await supabase
         .from("clients")
         .select("id")
         .eq("user_id", user.id)
         .single();
 
+      const clientData = clientDataRaw as { id: string } | null;
       if (clientError || !clientData) {
         setError("Could not find your client record");
         return;
@@ -89,7 +86,11 @@ export default function ClientTasksPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [router, supabase]);
+
+  useEffect(() => {
+    loadTasks();
+  }, [loadTasks]);
 
   async function toggleTaskStatus(taskIndex: number) {
     const task = tasks[taskIndex];
@@ -105,12 +106,13 @@ export default function ClientTasksPage() {
       if (!user) throw new Error("Not authenticated");
 
       // Find the client_task record
-      const { data: clientData } = await supabase
+      const { data: clientDataRaw } = await supabase
         .from("clients")
         .select("id")
         .eq("user_id", user.id)
         .single();
 
+      const clientData = clientDataRaw as { id: string } | null;
       if (!clientData) throw new Error("Client not found");
 
       const { data: clientTask } = await supabase
@@ -123,13 +125,14 @@ export default function ClientTasksPage() {
       if (!clientTask) throw new Error("Task not found");
 
       // Update status
-      const { error: updateError } = await supabase
+      const updateData = {
+        status: newStatus,
+        completed_at: newStatus === "completed" ? new Date().toISOString() : null,
+      };
+      const { error: updateError } = await (supabase as any)
         .from("client_tasks")
-        .update({
-          status: newStatus,
-          completed_at: newStatus === "completed" ? new Date().toISOString() : null,
-        })
-        .eq("id", clientTask.id);
+        .update(updateData)
+        .eq("id", (clientTask as any).id);
 
       if (updateError) throw updateError;
 

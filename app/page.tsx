@@ -14,12 +14,12 @@ export default function Home() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         // Get user role from database
-        supabase
+        (supabase as any)
           .from("users")
           .select("role")
           .eq("id", session.user.id)
           .single()
-          .then(({ data }) => {
+          .then(({ data }: any) => {
             if (data?.role === "coach") {
               router.push("/coach/clients");
             } else if (data?.role === "client") {

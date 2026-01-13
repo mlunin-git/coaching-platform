@@ -32,10 +32,11 @@ export default function CoachLayout({
         .eq("id", session.user.id)
         .single()
         .then(({ data, error }) => {
-          if (error || !data || data.role !== "coach") {
+          const userData = data as Database["public"]["Tables"]["users"]["Row"] | null;
+          if (error || !userData || userData.role !== "coach") {
             router.push("/auth/login");
           } else {
-            setUser(data);
+            setUser(userData);
           }
           setLoading(false);
         });

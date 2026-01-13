@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase";
 import type { Database } from "@/lib/database.types";
@@ -18,11 +18,7 @@ export default function ClientsPage() {
 
   const supabase = getSupabaseClient();
 
-  useEffect(() => {
-    loadClients();
-  }, []);
-
-  async function loadClients() {
+  const loadClients = useCallback(async () => {
     setLoading(true);
     try {
       const {
@@ -43,7 +39,11 @@ export default function ClientsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [supabase]);
+
+  useEffect(() => {
+    loadClients();
+  }, [loadClients]);
 
   async function handleAddClient(e: React.FormEvent) {
     e.preventDefault();
@@ -67,21 +67,21 @@ export default function ClientsPage() {
       if (!authData.user) throw new Error("Failed to create user");
 
       // Create user profile
-      const { error: profileError } = await supabase.from("users").insert({
+      const { error: profileError } = await (supabase as any).from("users").insert({
         id: authData.user.id,
         email: newClientEmail,
         name: newClientName,
         role: "client",
-      });
+      } as any);
 
       if (profileError) throw profileError;
 
       // Create client record
-      const { error: clientError } = await supabase.from("clients").insert({
+      const { error: clientError } = await (supabase as any).from("clients").insert({
         coach_id: user.id,
         user_id: authData.user.id,
         name: newClientName,
-      });
+      } as any);
 
       if (clientError) throw clientError;
 
