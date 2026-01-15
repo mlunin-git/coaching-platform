@@ -15,7 +15,7 @@ export default function Home() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         // Get user role from database
-        const { data } = await (supabase as any)
+        const { data } = await supabase
           .from("users")
           .select("role")
           .eq("id", session.user.id)
@@ -27,7 +27,7 @@ export default function Home() {
           router.push("/client/tasks");
         }
       } else {
-        router.push("/auth/login");
+        router.push("/apps");
       }
       setLoading(false);
     };

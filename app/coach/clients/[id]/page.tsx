@@ -18,11 +18,23 @@ interface ClientTask {
   clientTaskId: string;
 }
 
+interface ClientTaskWithTask {
+  id: string;
+  status: "pending" | "completed";
+  completed_at: string | null;
+  tasks: {
+    id: string;
+    title: string;
+    description: string | null;
+    created_at: string;
+  };
+}
+
 interface ClientInfo {
   client: Client;
   user: {
     name: string;
-    email: string;
+    email: string | null;
   };
 }
 
@@ -96,7 +108,7 @@ export default function ClientDetailPage() {
 
       if (tasksError) throw tasksError;
 
-      const transformedTasks = (data || []).map((item: any) => ({
+      const transformedTasks = (data as ClientTaskWithTask[] || []).map((item) => ({
         id: item.tasks.id,
         clientTaskId: item.id,
         title: item.tasks.title,
@@ -133,7 +145,7 @@ export default function ClientDetailPage() {
       if (!user) throw new Error("Not authenticated");
 
       // Create task for this coach
-      const { data: newTask, error: taskError } = await (supabase as any)
+      const { data: newTask, error: taskError } = await supabase
         .from("tasks")
         .insert({
           coach_id: user.id,
@@ -147,7 +159,7 @@ export default function ClientDetailPage() {
       if (!newTask) throw new Error("Failed to create task");
 
       // Create client_task for this specific client
-      const { error: clientTaskError } = await (supabase as any)
+      const { error: clientTaskError } = await supabase
         .from("client_tasks")
         .insert({
           client_id: clientId,
@@ -173,7 +185,7 @@ export default function ClientDetailPage() {
 
     try {
       const supabase = getSupabaseClient();
-      const { error: updateError } = await (supabase as any)
+      const { error: updateError } = await supabase
         .from("client_tasks")
         .update({
           status: newStatus,
@@ -207,12 +219,18 @@ export default function ClientDetailPage() {
   return (
     <div className="space-y-8">
       {/* Back button and header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
         <button
           onClick={() => router.back()}
           className="text-blue-600 hover:text-blue-700 font-medium"
         >
           ← Back to Clients
+        </button>
+        <button
+          onClick={() => router.push(`/coach/messages/${clientId}`)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+        >
+          📨 Message Client
         </button>
       </div>
 
@@ -222,7 +240,9 @@ export default function ClientDetailPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <p className="text-sm text-gray-600">Email</p>
-            <p className="text-lg font-medium text-gray-900">{clientInfo.user.email}</p>
+            <p className="text-lg font-medium text-gray-900">
+              {clientInfo.user.email || "N/A"}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Added on</p>

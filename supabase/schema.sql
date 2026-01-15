@@ -55,6 +55,12 @@ ALTER TABLE client_tasks ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can read their own profile" ON users
   FOR SELECT USING (auth.uid() = auth_user_id);
 
+CREATE POLICY "Authenticated users can read profile by auth_user_id" ON users
+  FOR SELECT USING (
+    auth.uid() IS NOT NULL AND
+    auth_user_id = auth.uid()
+  );
+
 CREATE POLICY "Coaches can read their clients' profiles" ON users
   FOR SELECT USING (
     EXISTS (

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { Database } from "@/lib/database.types";
 
 type Client = Database["public"]["Tables"]["clients"]["Row"];
@@ -16,6 +17,7 @@ interface ClientWithUser extends Client {
 
 export default function ClientsPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [clients, setClients] = useState<ClientWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [newClientName, setNewClientName] = useState("");
@@ -192,13 +194,84 @@ export default function ClientsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Manage Clients</h2>
-        <p className="text-gray-600">Add new clients to your coaching program</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t("coach.manageClients")}</h2>
+        <p className="text-gray-600">{t("coach.addDescription")}</p>
+      </div>
+
+      {/* Clients List */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">
+            {t("coach.clientsList")} ({clients.length})
+          </h3>
+        </div>
+
+        {clients.length === 0 ? (
+          <div className="p-6 text-center text-gray-500">
+            {t("coach.noClientsYet")}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">{t("coach.name")}</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
+                    {t("coach.identifier")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
+                    {t("coach.loginAccess")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
+                    {t("coach.added")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
+                    {t("coach.actions")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {clients.map((client) => (
+                  <tr key={client.id} className="border-b border-gray-200 hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm text-gray-900">{client.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      <span className="font-mono text-xs">
+                        {client.email || client.client_identifier || "N/A"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {client.has_auth_access ? (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {t("coach.canLogin")}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          {t("coach.viewOnly")}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {new Date(client.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <button
+                        onClick={() => router.push(`/coach/clients/${client.id}`)}
+                        className="text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        {t("coach.viewTasks")}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Add Client Form */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Client</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("coach.addNewClient")}</h3>
         <form onSubmit={handleAddClient} className="space-y-4">
           {/* Client Type Toggle */}
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
@@ -210,7 +283,7 @@ export default function ClientsPage() {
                 className="w-4 h-4 text-blue-600"
               />
               <span className="text-sm font-medium text-gray-700">
-                Client with email (can log in)
+                {t("coach.withEmail")}
               </span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
@@ -221,7 +294,7 @@ export default function ClientsPage() {
                 className="w-4 h-4 text-blue-600"
               />
               <span className="text-sm font-medium text-gray-700">
-                Client without email (view-only, managed by coach)
+                {t("coach.withoutEmail")}
               </span>
             </label>
           </div>
@@ -229,7 +302,7 @@ export default function ClientsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Client Name
+                {t("coach.clientName")}
               </label>
               <input
                 id="name"
@@ -246,7 +319,7 @@ export default function ClientsPage() {
             {useEmail && (
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Client Email
+                  {t("coach.clientEmail")}
                 </label>
                 <input
                   id="email"
@@ -264,12 +337,12 @@ export default function ClientsPage() {
           {/* Show generated client ID after creation */}
           {generatedClientId && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm font-medium text-green-900">Client created successfully!</p>
+              <p className="text-sm font-medium text-green-900">{t("coach.clientCreatedSuccess")}</p>
               <p className="text-sm text-green-700 mt-1">
-                Client ID: <span className="font-mono font-bold">{generatedClientId}</span>
+                {t("coach.clientIdLabel")} <span className="font-mono font-bold">{generatedClientId}</span>
               </p>
               <p className="text-xs text-green-600 mt-2">
-                This client cannot log in. All management is done through your coach dashboard.
+                {t("coach.clientNoLogin")}
               </p>
             </div>
           )}
@@ -285,89 +358,18 @@ export default function ClientsPage() {
             disabled={adding}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-medium"
           >
-            {adding ? "Adding..." : "Add Client"}
+            {adding ? t("common.creating") : t("coach.createClient")}
           </button>
         </form>
       </div>
 
-      {/* Clients List */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Clients ({clients.length})
-          </h3>
-        </div>
-
-        {clients.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">
-            No clients yet. Add one using the form above.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Name</th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                    Identifier
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                    Login Access
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                    Added
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {clients.map((client) => (
-                  <tr key={client.id} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm text-gray-900">{client.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      <span className="font-mono text-xs">
-                        {client.email || client.client_identifier || "N/A"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      {client.has_auth_access ? (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          ✓ Can log in
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          View-only
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(client.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <button
-                        onClick={() => router.push(`/coach/clients/${client.id}`)}
-                        className="text-blue-600 hover:text-blue-700 font-medium"
-                      >
-                        View Tasks
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
       {/* Quick Links */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="font-semibold text-blue-900 mb-3">Next Steps</h3>
+        <h3 className="font-semibold text-blue-900 mb-3">{t("coach.nextSteps")}</h3>
         <ul className="space-y-2 text-sm text-blue-800">
-          <li>✓ Add clients to your program</li>
-          <li>→ Create tasks for your clients</li>
-          <li>→ Track their progress</li>
+          <li>✓ {t("coach.addClientsStep")}</li>
+          <li>→ {t("coach.createTasksStep")}</li>
+          <li>→ {t("coach.trackProgressStep")}</li>
         </ul>
       </div>
     </div>
