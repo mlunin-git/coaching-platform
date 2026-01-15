@@ -114,16 +114,24 @@ export default function ClientsPage() {
 
       if (useEmail) {
         // === CLIENT WITH EMAIL (existing flow) ===
+        // Generate cryptographically secure password
+        const bytes = new Uint8Array(12);
+        crypto.getRandomValues(bytes);
+        const securePassword = btoa(String.fromCharCode(...bytes))
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=/g, "");
+
         const { data: authData, error: signUpError } = await supabase.auth.signUp({
           email: newClientEmail,
-          password: Math.random().toString(36).slice(-12), // Random password
+          password: securePassword,
         });
 
         if (signUpError) throw signUpError;
         if (!authData.user) throw new Error("Failed to create auth user");
 
         // Create user profile
-        const { data: newUser, error: profileError } = await (supabase as any)
+        const { data: newUser, error: profileError } = await supabase
           .from("users")
           .insert({
             auth_user_id: authData.user.id,
@@ -132,7 +140,7 @@ export default function ClientsPage() {
             role: "client",
             has_auth_access: true,
             client_identifier: null,
-          } as any)
+          })
           .select()
           .single();
 
@@ -144,7 +152,7 @@ export default function ClientsPage() {
         clientIdentifier = await generateClientIdentifier(coachUser.id, supabase);
 
         // Create user profile WITHOUT Supabase Auth
-        const { data: newUser, error: profileError } = await (supabase as any)
+        const { data: newUser, error: profileError } = await supabase
           .from("users")
           .insert({
             auth_user_id: null,
@@ -153,7 +161,7 @@ export default function ClientsPage() {
             name: newClientName,
             role: "client",
             has_auth_access: false,
-          } as any)
+          })
           .select()
           .single();
 
@@ -163,13 +171,13 @@ export default function ClientsPage() {
       }
 
       // Create client record
-      const { error: clientError } = await (supabase as any)
+      const { error: clientError } = await supabase
         .from("clients")
         .insert({
           coach_id: coachUser.id,
           user_id: newUserId,
           name: newClientName,
-        } as any);
+        });
 
       if (clientError) throw clientError;
 

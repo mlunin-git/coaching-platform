@@ -88,7 +88,7 @@ export async function getUnreadCount(
 
     if (clientsError) throw clientsError;
 
-    const clientIds = (clientsData || []).map((c: any) => c.id);
+    const clientIds = (clientsData || []).map((c) => c.id);
     if (clientIds.length === 0) return 0;
 
     const { count, error } = await supabase
@@ -111,10 +111,13 @@ export async function getUnreadCount(
     if (clientError) return 0;
     if (!clientData) return 0;
 
+    const clientId = clientData?.id;
+    if (!clientId) return 0;
+
     const { count, error } = await supabase
       .from("messages")
       .select("id", { count: "exact", head: true })
-      .eq("client_id", (clientData as any).id)
+      .eq("client_id", clientId)
       .eq("sender_type", "coach")
       .eq("is_read", false);
 
@@ -139,7 +142,7 @@ export async function getUnreadCountsByClient(
 
   if (clientsError) throw clientsError;
 
-  const clientIds = (clientsData || []).map((c: any) => c.id);
+  const clientIds = (clientsData || []).map((c) => c.id);
   if (clientIds.length === 0) return {};
 
   // Get all unread messages from clients
@@ -154,7 +157,7 @@ export async function getUnreadCountsByClient(
 
   // Count messages per client
   const counts: Record<string, number> = {};
-  (data || []).forEach((msg: any) => {
+  (data || []).forEach((msg) => {
     counts[msg.client_id] = (counts[msg.client_id] || 0) + 1;
   });
 

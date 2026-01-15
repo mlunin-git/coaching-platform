@@ -14,7 +14,7 @@ export async function signUp(email: string, password: string, name: string, role
   if (error) throw error;
 
   // Insert user profile with auth_user_id reference
-  const { error: profileError } = await (supabase as any)
+  const { error: profileError } = await supabase
     .from("users")
     .insert({
       auth_user_id: data.user?.id,
@@ -23,7 +23,7 @@ export async function signUp(email: string, password: string, name: string, role
       role,
       has_auth_access: true,
       client_identifier: null,
-    } as any);
+    });
 
   if (profileError) throw profileError;
 

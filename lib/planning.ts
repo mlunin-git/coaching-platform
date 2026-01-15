@@ -86,7 +86,8 @@ export async function getGroupIdeas(groupId: string) {
     .select(`
       *,
       participant:planning_participants(name, color),
-      promoted_event:planning_events(id, title)
+      promoted_event:planning_events(id, title),
+      planning_idea_votes(id)
     `)
     .eq("group_id", groupId)
     .order("created_at", { ascending: false });
@@ -96,19 +97,11 @@ export async function getGroupIdeas(groupId: string) {
     return [];
   }
 
-  // Get vote counts for each idea
-  if (ideas) {
-    for (const idea of ideas) {
-      const { count } = await supabase
-        .from("planning_idea_votes")
-        .select("id", { count: "exact" })
-        .eq("idea_id", idea.id);
-
-      idea.vote_count = count || 0;
-    }
-  }
-
-  return ideas || [];
+  // Count votes in JavaScript instead of making N queries
+  return (ideas || []).map((idea: any) => ({
+    ...idea,
+    vote_count: (idea.planning_idea_votes || []).length
+  }));
 }
 
 /**
@@ -163,7 +156,8 @@ export async function getGroupEvents(groupId: string) {
     .from("planning_events")
     .select(`
       *,
-      creator:planning_participants(name, color)
+      creator:planning_participants(name, color),
+      planning_event_participants(id)
     `)
     .eq("group_id", groupId)
     .order("start_date", { ascending: true });
@@ -173,19 +167,11 @@ export async function getGroupEvents(groupId: string) {
     return [];
   }
 
-  // Get attendee counts for each event
-  if (events) {
-    for (const event of events) {
-      const { count } = await supabase
-        .from("planning_event_participants")
-        .select("id", { count: "exact" })
-        .eq("event_id", event.id);
-
-      event.attendee_count = count || 0;
-    }
-  }
-
-  return events || [];
+  // Count attendees in JavaScript instead of making N queries
+  return (events || []).map((event: any) => ({
+    ...event,
+    attendee_count: (event.planning_event_participants || []).length
+  }));
 }
 
 /**

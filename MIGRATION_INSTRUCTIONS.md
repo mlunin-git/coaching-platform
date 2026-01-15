@@ -1,3 +1,18 @@
+# How to Run the Year Planning Module Migration
+
+Since I cannot access your database password directly, here's the easiest way to run the migration:
+
+## Step 1: Open Supabase SQL Editor
+1. Go to https://supabase.com/dashboard
+2. Select your project: `aqcanwccrodchljmwsjf`
+3. In the left sidebar, click **SQL Editor**
+4. Click **New Query**
+
+## Step 2: Copy the Complete Migration SQL
+
+Copy and paste this entire SQL into the editor:
+
+```sql
 -- Year Planning Module Schema
 -- Enables coaches to create shared planning groups where participants can collaboratively plan events
 
@@ -32,7 +47,7 @@ CREATE TABLE IF NOT EXISTS planning_ideas (
   location VARCHAR(255),
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
-  promoted_to_event_id UUID
+  promoted_to_event_id UUID REFERENCES planning_events(id) ON DELETE SET NULL
 );
 
 -- 4. Votes on Ideas (one vote per person per idea)
@@ -328,15 +343,6 @@ CREATE POLICY "Participants can remove attendance" ON planning_event_participant
   );
 
 -- ============================================================
--- Add Foreign Key for Ideas → Events (after events table exists)
--- ============================================================
-
-ALTER TABLE planning_ideas
-ADD CONSTRAINT fk_planning_ideas_promoted_event
-FOREIGN KEY (promoted_to_event_id)
-REFERENCES planning_events(id) ON DELETE SET NULL;
-
--- ============================================================
 -- Performance Indexes
 -- ============================================================
 
@@ -353,3 +359,23 @@ CREATE INDEX idx_planning_events_created_by ON planning_events(created_by);
 CREATE INDEX idx_planning_events_is_archived ON planning_events(is_archived);
 CREATE INDEX idx_planning_event_participants_event_id ON planning_event_participants(event_id);
 CREATE INDEX idx_planning_event_participants_participant_id ON planning_event_participants(participant_id);
+```
+
+## Step 3: Execute the SQL
+Click the **Run** button (play icon) or press **Ctrl+Enter** to execute the entire migration.
+
+## Step 4: Verify Success
+You should see:
+- ✅ 6 tables created
+- ✅ RLS enabled on all tables
+- ✅ 25+ RLS policies created
+- ✅ 13 performance indexes created
+
+That's it! Your Year Planning Module database is ready to go! 🚀
+
+## Next Steps
+Once completed, you can:
+1. Start your dev server: `npm run dev`
+2. Go to `http://localhost:3000/planning/admin`
+3. Create a planning group
+4. Copy the shareable link and share it with others!
