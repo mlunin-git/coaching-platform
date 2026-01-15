@@ -8,11 +8,15 @@ Simple, secure coaching platform where coaches manage clients and track their pr
 - Coaches create tasks that all clients see
 - Clients view their tasks and mark them as complete
 - Coaches track client progress
+- Coaches create planning groups for collaborative year planning
+- Participants can join planning groups via shareable links (no login required)
+- Groups can submit ideas, vote, create events, and view analytics
 - Full security with Row-Level Security (RLS) policies
 
 **Who uses it:**
-- Coaches: Manage clients, create tasks, view progress
-- Clients: See assigned tasks, update status
+- **Coaches**: Manage clients, create tasks, view progress, create planning groups
+- **Clients**: See assigned tasks, update status, message coach
+- **Participants**: Join planning groups, submit ideas, vote, attend events
 
 ## Tech Stack
 
