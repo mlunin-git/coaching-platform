@@ -77,7 +77,8 @@ export function ParticipantManager({
         });
 
       if (insertError) {
-        setError(t("planning.error.participantCreation"));
+        console.error("Error inserting participant:", insertError);
+        setError(insertError.message || t("planning.error.participantCreation"));
         setLoading(false);
         return;
       }
