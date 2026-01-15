@@ -30,13 +30,13 @@ export function Footer() {
             href="/privacy"
             className="hover:text-indigo-600 transition-colors"
           >
-            {t("footer.privacy", "Privacy Policy")}
+            {t("footer.privacy")}
           </Link>
 
           <span className="hidden md:inline">•</span>
 
           <span className="text-xs text-gray-500">
-            {t("footer.lastUpdated", "Last Updated")}: 2026-01-15
+            {t("footer.lastUpdated")}: 2026-01-15
           </span>
         </div>
       </div>

@@ -1,8 +1,8 @@
 "use client";
 
 interface City {
-  city: string;
-  country: string;
+  city: string | undefined;
+  country: string | undefined;
   count: number;
 }
 
@@ -10,6 +10,7 @@ export function CitiesMap({ cities }: { cities: City[] }) {
   // Group cities by country
   const citiesByCountry = cities.reduce(
     (acc, city) => {
+      if (!city.country) return acc;
       if (!acc[city.country]) {
         acc[city.country] = [];
       }

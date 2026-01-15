@@ -26,8 +26,7 @@ export default function Home() {
           .from("users")
           .select("role")
           .eq("auth_user_id", session.user.id)
-          .single()
-          .timeout(5000);
+          .single();
 
         if (error) {
           console.error("User lookup error:", error);

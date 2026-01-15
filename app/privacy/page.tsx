@@ -34,7 +34,7 @@ export default function PrivacyPage() {
                 Introduction
               </h2>
               <p>
-                Safe Space ("we", "us", "our", or "Company") operates the
+                Safe Space (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;, or &quot;Company&quot;) operates the
                 coaching platform website. This page informs you of our policies
                 regarding the collection, use, and disclosure of personal data
                 when you use our service.
@@ -134,7 +134,7 @@ export default function PrivacyPage() {
               <p>
                 This platform uses{" "}
                 <strong>Supabase</strong> for backend services including
-                database hosting and authentication. Please refer to Supabase's
+                database hosting and authentication. Please refer to Supabase&apos;s
                 privacy policy for their data handling practices.
               </p>
             </section>
@@ -165,7 +165,7 @@ export default function PrivacyPage() {
               </h2>
               <p>
                 We may update this privacy policy from time to time. We will
-                notify you of any changes by updating the "Last Updated" date.
+                notify you of any changes by updating the &quot;Last Updated&quot; date.
                 Your continued use of the service constitutes your acceptance
                 of the updated policy.
               </p>

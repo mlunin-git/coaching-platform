@@ -93,7 +93,7 @@ export async function getGroupIdeas(groupId: string) {
       `)
       .eq("group_id", groupId)
       .order("created_at", { ascending: false })
-      .timeout(5000);
+      
 
     if (error) {
       throw new Error(`Failed to fetch ideas: ${error.message}`);
@@ -197,7 +197,7 @@ export async function getGroupEvents(groupId: string) {
       `)
       .eq("group_id", groupId)
       .order("start_date", { ascending: true })
-      .timeout(5000);
+      
 
     if (error) {
       throw new Error(`Failed to fetch events: ${error.message}`);

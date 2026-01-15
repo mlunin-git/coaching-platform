@@ -20,29 +20,41 @@ import { Analytics } from "@/components/planning/Analytics";
 interface Participant {
   id: string;
   name: string;
-  color: string;
+  color: string | null;
 }
 
 interface Idea {
   id: string;
   title: string;
-  description: string;
-  location: string;
-  participant: { name: string; color: string };
+  description?: string;
+  location?: string;
+  group_id: string;
+  participant_id: string;
+  promoted_to_event_id?: string;
+  created_at: string;
+  updated_at: string;
+  participant?: { name: string; color?: string };
+  promoted_event?: { id: string; title: string };
   vote_count: number;
 }
 
 interface Event {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   start_date: string;
   end_date?: string;
-  location: string;
-  city: string;
-  country: string;
+  location?: string;
+  city?: string;
+  country?: string;
   is_archived: boolean;
-  creator: { name: string; color: string };
+  group_id: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+  creator?: { name: string; color?: string };
+  planning_event_participants?: Array<{ id: string }>;
+  attendee_count?: number;
 }
 
 type TabType = "ideas" | "events";

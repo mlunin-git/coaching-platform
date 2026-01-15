@@ -57,7 +57,7 @@ export function SecondaryGainsAnalyzer() {
       {/* Input */}
       <div className="bg-white rounded-xl shadow-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">Add Consequence</h3>
-        <p className="text-sm text-gray-600 mb-3">What's a consequence of achieving (or not achieving) your goal?</p>
+        <p className="text-sm text-gray-600 mb-3">What&apos;s a consequence of achieving (or not achieving) your goal?</p>
         <div className="flex gap-3">
           <input
             value={newItem}

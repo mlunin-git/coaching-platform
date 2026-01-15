@@ -46,8 +46,7 @@ export default function AdminPage() {
         .from("users")
         .select("id")
         .eq("auth_user_id", session.user.id)
-        .single()
-        .timeout(5000);
+        .single();
 
       if (userError || !userData) {
         console.error("User lookup error:", userError);
@@ -60,8 +59,7 @@ export default function AdminPage() {
         .from("planning_groups")
         .select("*")
         .eq("coach_id", userData.id)
-        .order("created_at", { ascending: false })
-        .timeout(5000);
+        .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Groups fetch error:", error);

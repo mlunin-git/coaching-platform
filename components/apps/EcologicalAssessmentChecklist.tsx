@@ -131,7 +131,7 @@ export function EcologicalAssessmentChecklist() {
         <div className="bg-green-50 border border-green-200 rounded-lg p-6">
           <h4 className="font-semibold text-green-900 mb-2">✓ Assessment Complete!</h4>
           <p className="text-sm text-green-800">
-            You've thoroughly considered the ecological impact of your goal across all life areas.
+            You&apos;ve thoroughly considered the ecological impact of your goal across all life areas.
           </p>
         </div>
       )}

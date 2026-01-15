@@ -112,8 +112,7 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
         .from("users")
         .select("id")
         .eq("auth_user_id", session.user.id)
-        .single()
-        .timeout(5000);
+        .single();
 
       if (userError || !userData) {
         setError(t("planning.error.unauthorized"));
@@ -133,8 +132,7 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
           access_token: accessToken,
         })
         .select()
-        .single()
-        .timeout(5000);
+        .single();
 
       if (groupError || !groupData) {
         console.error("Group creation error:", groupError);
@@ -152,8 +150,7 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
 
       const { error: participantError } = await supabase
         .from("planning_participants")
-        .insert(participantInserts)
-        .timeout(5000);
+        .insert(participantInserts);
 
       if (participantError) {
         console.error("Participant creation error:", participantError);

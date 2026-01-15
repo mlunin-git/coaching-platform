@@ -16,7 +16,7 @@ export default function ClientLayout({
   const [loading, setLoading] = useState(true);
 
   // Call hook early (even with empty ID, it's safe)
-  const unreadCount = useUnreadMessages(user?.id || "", "client");
+  const { unreadCount } = useUnreadMessages(user?.id || "", "client");
 
   useEffect(() => {
     const supabase = getSupabaseClient();
@@ -33,7 +33,6 @@ export default function ClientLayout({
         .select("*")
         .eq("auth_user_id", session.user.id)
         .single()
-        .timeout(5000)
         .then(({ data, error }) => {
           const userData = data as Database["public"]["Tables"]["users"]["Row"] | null;
           if (error || !userData || userData.role !== "client" || !userData.has_auth_access) {

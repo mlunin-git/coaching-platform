@@ -9,16 +9,21 @@ import { IdeaForm } from "./IdeaForm";
 
 interface Participant {
   name: string;
-  color: string;
+  color?: string;
 }
 
 interface Idea {
   id: string;
   title: string;
-  description: string;
-  location: string;
-  participant: Participant;
+  description?: string;
+  location?: string;
+  group_id: string;
   participant_id: string;
+  promoted_to_event_id?: string;
+  created_at: string;
+  updated_at: string;
+  participant?: Participant;
+  promoted_event?: { id: string; title: string };
   vote_count: number;
 }
 

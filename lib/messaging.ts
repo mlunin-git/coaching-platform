@@ -27,8 +27,7 @@ export async function getMessages(clientId: string): Promise<Message[]> {
       .from("messages")
       .select("*")
       .eq("client_id", clientId)
-      .order("created_at", { ascending: true })
-      .timeout(5000);  // 5 second timeout
+      .order("created_at", { ascending: true });
 
     if (error) {
       throw new Error(`Failed to fetch messages for client ${clientId}: ${error.message}`);
@@ -86,7 +85,7 @@ export async function sendMessage(
       })
       .select()
       .single()
-      .timeout(5000);
+      
 
     if (error) {
       throw new Error(`Failed to send message: ${error.message}`);
@@ -139,7 +138,7 @@ export async function markMessagesAsRead(
       .eq("client_id", clientId)
       .eq("sender_type", senderTypeToMarkRead)
       .eq("is_read", false)
-      .timeout(5000);
+      
 
     if (error) {
       throw new Error(`Failed to mark messages as read: ${error.message}`);
@@ -179,7 +178,7 @@ export async function getUnreadCount(
         .from("clients")
         .select("id")
         .eq("coach_id", userId)
-        .timeout(5000);
+        
 
       if (clientsError) {
         console.error('Failed to fetch coach clients:', clientsError);
@@ -195,7 +194,7 @@ export async function getUnreadCount(
         .eq("sender_type", "client")
         .eq("is_read", false)
         .in("client_id", clientIds)
-        .timeout(5000);
+        
 
       if (error) {
         console.error('Failed to count unread messages:', error);
@@ -210,7 +209,7 @@ export async function getUnreadCount(
         .select("id")
         .eq("user_id", userId)
         .single()
-        .timeout(5000);
+        
 
       if (clientError) {
         // Client record not found is not a critical error
@@ -228,7 +227,7 @@ export async function getUnreadCount(
         .eq("client_id", clientData.id)
         .eq("sender_type", "coach")
         .eq("is_read", false)
-        .timeout(5000);
+        
 
       if (error) {
         console.error('Failed to count client unread messages:', error);
@@ -266,7 +265,7 @@ export async function getUnreadCountsByClient(
       .from("clients")
       .select("id")
       .eq("coach_id", coachUserId)
-      .timeout(5000);
+      
 
     if (clientsError) {
       console.error('Failed to fetch coach clients for unread counts:', clientsError);
@@ -283,7 +282,7 @@ export async function getUnreadCountsByClient(
       .eq("sender_type", "client")
       .eq("is_read", false)
       .in("client_id", clientIds)
-      .timeout(5000);
+      
 
     if (error) {
       console.error('Failed to fetch unread messages:', error);

@@ -98,7 +98,7 @@ export default function LoginPage() {
           </Link>
         </p>
         <p className="text-gray-600 text-xs">
-          If you're a client and don't have a login, ask your coach to create an account for you.
+          If you&apos;re a client and don&apos;t have a login, ask your coach to create an account for you.
         </p>
       </div>
     </div>

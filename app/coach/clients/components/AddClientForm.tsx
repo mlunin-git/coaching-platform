@@ -63,8 +63,7 @@ export function AddClientForm({
         .from("users")
         .select("id")
         .eq("auth_user_id", user.id)
-        .single()
-        .timeout(5000);
+        .single();
 
       if (coachError || !coachUser) throw new Error("Coach not found");
 
@@ -98,8 +97,7 @@ export function AddClientForm({
             client_identifier: null,
           })
           .select()
-          .single()
-          .timeout(5000);
+          .single();
 
         if (profileError || !newUser) throw profileError || new Error("Failed to create user profile");
         newUserId = newUser.id;
@@ -126,8 +124,7 @@ export function AddClientForm({
             has_auth_access: false,
           })
           .select()
-          .single()
-          .timeout(5000);
+          .single();
 
         if (profileError || !newUser) throw profileError || new Error("Failed to create user profile");
         newUserId = newUser.id;
@@ -141,8 +138,7 @@ export function AddClientForm({
           coach_id: coachUser.id,
           user_id: newUserId,
           name: trimmedName,
-        })
-        .timeout(5000);
+        });
 
       if (clientError) throw clientError;
 

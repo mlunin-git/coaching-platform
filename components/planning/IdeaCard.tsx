@@ -4,18 +4,26 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Participant {
   name: string;
-  color: string;
+  color?: string;
+}
+
+interface Idea {
+  id: string;
+  title: string;
+  description?: string;
+  location?: string;
+  group_id: string;
+  participant_id: string;
+  promoted_to_event_id?: string;
+  created_at: string;
+  updated_at: string;
+  participant?: Participant;
+  promoted_event?: { id: string; title: string };
+  vote_count: number;
 }
 
 interface IdeaCardProps {
-  idea: {
-    id: string;
-    title: string;
-    description: string;
-    location: string;
-    participant: Participant;
-    vote_count: number;
-  };
+  idea: Idea;
   isOwner: boolean;
   hasVoted: boolean;
   onVote: () => void;
@@ -33,10 +41,12 @@ export function IdeaCard({
     <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 shadow-md hover:shadow-lg transition-shadow p-4">
       <div className="flex gap-4">
         {/* Color indicator */}
-        <div
-          className="w-3 h-full rounded-l-lg"
-          style={{ backgroundColor: idea.participant.color }}
-        />
+        {idea.participant?.color && (
+          <div
+            className="w-3 h-full rounded-l-lg"
+            style={{ backgroundColor: idea.participant.color }}
+          />
+        )}
 
         {/* Content */}
         <div className="flex-1 min-w-0">
@@ -51,9 +61,11 @@ export function IdeaCard({
           {idea.location && (
             <p className="text-xs text-gray-500 mt-2">📍 {idea.location}</p>
           )}
-          <p className="text-xs text-gray-500 mt-2">
-            by <span className="font-medium">{idea.participant.name}</span>
-          </p>
+          {idea.participant && (
+            <p className="text-xs text-gray-500 mt-2">
+              by <span className="font-medium">{idea.participant.name}</span>
+            </p>
+          )}
         </div>
 
         {/* Actions */}

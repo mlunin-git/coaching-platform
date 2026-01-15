@@ -46,7 +46,7 @@ export default function SignUpPage() {
       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <p className="text-sm text-blue-900 font-medium">Coach Registration Only</p>
         <p className="text-sm text-blue-800 mt-1">
-          This registration is for coaches only. If you're a client, your coach will create an account for you.
+          This registration is for coaches only. If you&apos;re a client, your coach will create an account for you.
         </p>
       </div>
 

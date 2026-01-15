@@ -18,8 +18,9 @@ interface PlanningGroup {
 interface Participant {
   id: string;
   name: string;
-  color: string;
+  color: string | null;
   created_at: string;
+  group_id?: string;
 }
 
 interface GroupDetailsProps {
@@ -103,6 +104,7 @@ export function GroupDetails({
         <ParticipantManager
           groupId={group.id}
           onParticipantAdded={handleParticipantAdded}
+          onParticipantRemoved={refreshParticipants}
         />
 
         {loading ? (
@@ -122,7 +124,7 @@ export function GroupDetails({
               >
                 <div
                   className="w-6 h-6 rounded-full"
-                  style={{ backgroundColor: participant.color }}
+                  style={{ backgroundColor: participant.color || "#9CA3AF" }}
                 />
                 <span className="text-gray-900 font-medium flex-1">
                   {participant.name}

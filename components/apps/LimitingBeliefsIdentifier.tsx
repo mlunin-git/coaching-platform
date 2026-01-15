@@ -73,7 +73,7 @@ export function LimitingBeliefsIdentifier() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               What limiting belief have you discovered?
             </label>
-            <p className="text-xs text-gray-500 mb-2">e.g., "I'm not good enough", "People don't like me", etc.</p>
+            <p className="text-xs text-gray-500 mb-2">e.g., &quot;I&apos;m not good enough&quot;, &quot;People don&apos;t like me&quot;, etc.</p>
             <input
               type="text"
               value={form.belief}
@@ -125,9 +125,9 @@ export function LimitingBeliefsIdentifier() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              What's a more empowering belief instead?
+              What&apos;s a more empowering belief instead?
             </label>
-            <p className="text-xs text-gray-500 mb-2">Create a positive counter-belief that's also realistic</p>
+            <p className="text-xs text-gray-500 mb-2">Create a positive counter-belief that&apos;s also realistic</p>
             <textarea
               value={form.counter}
               onChange={(e) => setForm({ ...form, counter: e.target.value })}
@@ -150,7 +150,7 @@ export function LimitingBeliefsIdentifier() {
         {beliefs.map((belief) => (
           <div key={belief.id} className="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
             <div className="flex justify-between items-start mb-3">
-              <h4 className="text-lg font-semibold text-gray-900">"{belief.belief}"</h4>
+              <h4 className="text-lg font-semibold text-gray-900">&quot;{belief.belief}&quot;</h4>
               <div className="flex gap-2">
                 <button
                   onClick={() => editBelief(belief)}

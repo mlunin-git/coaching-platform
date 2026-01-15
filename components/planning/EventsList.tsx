@@ -4,18 +4,26 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Creator {
   name: string;
-  color: string;
+  color?: string;
 }
 
 interface Event {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   start_date: string;
   end_date?: string;
-  location: string;
-  city: string;
-  creator: Creator;
+  location?: string;
+  city?: string;
+  country?: string;
+  is_archived: boolean;
+  group_id: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+  creator?: Creator;
+  planning_event_participants?: Array<{ id: string }>;
+  attendee_count?: number;
 }
 
 interface EventsListProps {
@@ -42,10 +50,12 @@ export function EventsList({ events }: EventsListProps) {
         >
           <div className="flex gap-4">
             {/* Color indicator */}
-            <div
-              className="w-3 h-full rounded-l-lg"
-              style={{ backgroundColor: event.creator.color }}
-            />
+            {event.creator?.color && (
+              <div
+                className="w-3 h-full rounded-l-lg"
+                style={{ backgroundColor: event.creator.color }}
+              />
+            )}
 
             {/* Content */}
             <div className="flex-1">
@@ -62,9 +72,11 @@ export function EventsList({ events }: EventsListProps) {
                 {event.city && <span>🏙️ {event.city}</span>}
               </div>
 
-              <p className="text-xs text-gray-500 mt-3">
-                by <span className="font-medium">{event.creator.name}</span>
-              </p>
+              {event.creator && (
+                <p className="text-xs text-gray-500 mt-3">
+                  by <span className="font-medium">{event.creator.name}</span>
+                </p>
+              )}
             </div>
           </div>
         </div>

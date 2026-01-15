@@ -37,7 +37,7 @@ export default function CoachLayout({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const unreadCount = useUnreadMessages(user?.id || "", "coach");
+  const { unreadCount } = useUnreadMessages(user?.id || "", "coach");
 
   useEffect(() => {
     const supabase = getSupabaseClient();
@@ -53,7 +53,6 @@ export default function CoachLayout({
         .select("*")
         .eq("auth_user_id", session.user.id)
         .single()
-        .timeout(5000)
         .then(({ data, error }) => {
           const userData = data as User | null;
           if (error || !userData || userData.role !== "coach") {

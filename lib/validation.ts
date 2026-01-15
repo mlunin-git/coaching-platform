@@ -100,7 +100,7 @@ export function validateColor(color: string): boolean {
 /**
  * Validate location string
  */
-export function validateLocation(location: string): boolean {
+export function validateLocation(location?: string): boolean {
   if (!location) return true; // Optional
   if (location.length > 255) return false;
   return true;

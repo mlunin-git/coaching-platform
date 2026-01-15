@@ -63,8 +63,7 @@ export default function ClientsPage() {
         .from("users")
         .select("id")
         .eq("auth_user_id", session.user.id)
-        .single()
-        .timeout(5000);
+        .single();
 
       if (coachError) {
         if (isMounted) {
@@ -86,15 +85,14 @@ export default function ClientsPage() {
         .select(
           `
           *,
-          user:user_id (
+          user:users!user_id (
             email,
             client_identifier,
             has_auth_access
           )
         `
         )
-        .eq("coach_id", coachUser.id)
-        .timeout(5000);
+        .eq("coach_id", coachUser.id);
 
       if (clientsError) {
         if (isMounted) {
@@ -104,7 +102,7 @@ export default function ClientsPage() {
       }
 
       // Flatten the data structure
-      const enrichedClients = (data || []).map((client: ClientWithUser) => ({
+      const enrichedClients = (data || []).map((client: any) => ({
         ...client,
         email: client.user?.email,
         client_identifier: client.user?.client_identifier,

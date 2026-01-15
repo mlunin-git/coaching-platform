@@ -14,12 +14,20 @@ import {
 interface Event {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   start_date: string;
   end_date?: string;
-  location: string;
-  city: string;
-  creator: { name: string; color: string };
+  location?: string;
+  city?: string;
+  country?: string;
+  is_archived: boolean;
+  group_id: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+  creator?: { name: string; color?: string };
+  planning_event_participants?: Array<{ id: string }>;
+  attendee_count?: number;
 }
 
 export function YearlyChart({

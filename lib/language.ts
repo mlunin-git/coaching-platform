@@ -25,7 +25,7 @@ export function t(language: Language, key: string): string {
 
   for (const k of keys) {
     if (typeof current === 'object' && current !== null && k in current) {
-      current = (current as Record<string, unknown>)[k];
+      current = (current as Record<string, unknown>)[k] as TranslationValue;
     } else {
       // Translation key not found - log in development
       if (process.env.NODE_ENV === 'development') {

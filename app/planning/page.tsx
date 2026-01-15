@@ -66,7 +66,7 @@ export default function PlanningLandingPage() {
                 Analytics
               </h3>
               <p className="text-gray-700">
-                Track events per month and see which cities you'll be visiting
+                Track events per month and see which cities you&apos;ll be visiting
                 most.
               </p>
             </div>

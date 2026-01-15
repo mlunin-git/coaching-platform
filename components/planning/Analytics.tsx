@@ -7,29 +7,41 @@ import { CitiesMap } from "./CitiesMap";
 interface Event {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   start_date: string;
   end_date?: string;
-  location: string;
-  city: string;
-  country: string;
+  location?: string;
+  city?: string;
+  country?: string;
   is_archived: boolean;
-  creator: { name: string; color: string };
+  group_id: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+  creator?: { name: string; color?: string };
+  planning_event_participants?: Array<{ id: string }>;
+  attendee_count?: number;
 }
 
 interface Idea {
   id: string;
   title: string;
-  description: string;
-  location: string;
-  participant: { name: string; color: string };
+  description?: string;
+  location?: string;
+  group_id: string;
+  participant_id: string;
+  promoted_to_event_id?: string;
+  created_at: string;
+  updated_at: string;
+  participant?: { name: string; color?: string };
+  promoted_event?: { id: string; title: string };
   vote_count: number;
 }
 
 interface Participant {
   id: string;
   name: string;
-  color: string;
+  color: string | null;
 }
 
 export function Analytics({
@@ -77,21 +89,21 @@ export function Analytics({
   });
 
   // Get active participants
-  const activeParticipants = currentYearEvents.map((e) => e.creator).filter(Boolean);
+  const activeParticipants = currentYearEvents.map((e) => e.creator).filter((c) => c !== undefined);
 
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
-            📊 {t("planning.analytics.eventsPerMonth", "Events per Month")}
+            📊 {t("planning.analytics.eventsPerMonth")}
           </h2>
           <YearlyChart events={currentYearEvents} year={currentYear} />
         </div>
 
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
-            🗺️ {t("planning.analytics.citiesMap", "Visited Cities")}
+            🗺️ {t("planning.analytics.citiesMap")}
           </h2>
           <CitiesMap cities={cities} />
         </div>

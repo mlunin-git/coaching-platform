@@ -7,9 +7,13 @@ import { getSupabaseClient } from "@/lib/supabase";
 
 interface User {
   id: string;
-  email: string;
+  email: string | null;
   name: string;
   role: "coach" | "client";
+  auth_user_id: string | null;
+  client_identifier: string | null;
+  has_auth_access: boolean;
+  created_at: string;
 }
 
 export function Navigation() {
@@ -123,7 +127,7 @@ export function Navigation() {
             {/* Language Selector */}
             <select
               value={language}
-              onChange={(e) => setLanguage(e.target.value)}
+              onChange={(e) => setLanguage(e.target.value as any)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white hover:border-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all cursor-pointer"
             >
               <option value="en">🇬🇧 English</option>

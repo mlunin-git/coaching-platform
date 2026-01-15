@@ -137,7 +137,7 @@ export default function ClientTasksPage() {
       if (!clientTask) throw new Error("Task not found");
 
       // Update status
-      const updateData = {
+      const updateData: { status: "pending" | "completed"; completed_at: string | null } = {
         status: newStatus,
         completed_at: newStatus === "completed" ? new Date().toISOString() : null,
       };
