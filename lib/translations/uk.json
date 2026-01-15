@@ -362,5 +362,86 @@
       "addSector": "Додати сектор",
       "cancel": "Скасувати"
     }
+  },
+  "planning": {
+    "title": "Планування року",
+    "admin": {
+      "createGroup": "Створити групу планування",
+      "manage": "Керування",
+      "groupName": "Назва групи",
+      "participants": "Учасники",
+      "addParticipant": "Додати учасника",
+      "participantColor": "Колір",
+      "shareLink": "Спільна посилання",
+      "copyLink": "Копіювати посилання",
+      "copied": "Скопійовано!",
+      "editGroup": "Редагувати групу",
+      "deleteGroup": "Видалити групу",
+      "deleteConfirm": "Ви впевнені, що хочете видалити цю групу та всі її дані?",
+      "noGroups": "Немає груп планування. Створіть одну для початку!"
+    },
+    "participant": {
+      "selectName": "Виберіть ваше ім'я",
+      "you": "Ваше",
+      "ideas": "Ідеї",
+      "events": "Подіï",
+      "calendar": "Календар",
+      "analytics": "Аналітика",
+      "viewOnly": "Ви можете переглядати вміст. Виберіть ваше ім'я для участі."
+    },
+    "ideas": {
+      "createIdea": "Створити ідею",
+      "editIdea": "Редагувати ідею",
+      "deleteIdea": "Видалити ідею",
+      "your": "Ваша ідея",
+      "title": "Назва",
+      "description": "Опис",
+      "suggestedDates": "Пропоновані дати",
+      "location": "Місцеположення",
+      "votes": "Голоси",
+      "vote": "Голосувати",
+      "unvote": "Видалити голос",
+      "promoteToEvent": "Перетворити на подію",
+      "promoted": "Вже перетворено на подію",
+      "selectNameToParticipate": "Виберіть ваше ім'я для голосування та створення ідей"
+    },
+    "events": {
+      "createEvent": "Створити подію",
+      "editEvent": "Редагувати подію",
+      "deleteEvent": "Видалити подію",
+      "noEvents": "Немає подій. Створіть одну для початку!",
+      "startDate": "Дата початку",
+      "endDate": "Дата закінчення",
+      "city": "Місто",
+      "country": "Країна",
+      "archive": "Архів",
+      "archived": "Архівовані подіï",
+      "markAttending": "Позначити як учасника",
+      "unmarkAttending": "Видалити участь",
+      "attendees": "Учасники",
+      "noAttendees": "Немає учасників"
+    },
+    "analytics": {
+      "yearlyChart": "Подіï за роком",
+      "citiesMap": "Відвідані міста",
+      "totalEvents": "Всього подій",
+      "totalIdeas": "Всього ідей",
+      "mostActive": "Найактивніший учасник",
+      "eventsPerMonth": "Подіï за місяць"
+    },
+    "validation": {
+      "groupNameRequired": "Назва групи обов'язкова",
+      "participantNameRequired": "Ім'я учасника обов'язкове",
+      "participantExists": "Це ім'я учасника вже існує",
+      "atLeastOneParticipant": "Додайте принаймні одного учасника",
+      "noParticipants": "Учасники ще не додані",
+      "titleRequired": "Назва обов'язкова"
+    },
+    "error": {
+      "groupCreation": "Помилка при створенні групи",
+      "participantCreation": "Помилка при додаванні учасника",
+      "unauthorized": "У вас немає прав для виконання цієї дії",
+      "unknown": "Сталася неочікувана помилка"
+    }
   }
 }

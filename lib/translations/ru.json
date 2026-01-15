@@ -228,5 +228,86 @@
     "ecologicalAssessmentChecklistDescription": "Оцените последствия в разных сферах жизни",
     "logicalLevelsFramework": "Фреймворк логических уровней",
     "logicalLevelsFrameworkDescription": "Анализируйте ситуации на разных уровнях мышления"
+  },
+  "planning": {
+    "title": "Годовое планирование",
+    "admin": {
+      "createGroup": "Создать группу планирования",
+      "manage": "Управление",
+      "groupName": "Название группы",
+      "participants": "Участники",
+      "addParticipant": "Добавить участника",
+      "participantColor": "Цвет",
+      "shareLink": "Общая ссылка",
+      "copyLink": "Копировать ссылку",
+      "copied": "Скопировано!",
+      "editGroup": "Редактировать группу",
+      "deleteGroup": "Удалить группу",
+      "deleteConfirm": "Вы уверены, что хотите удалить эту группу и все ее данные?",
+      "noGroups": "Нет групп планирования. Создайте одну для начала!"
+    },
+    "participant": {
+      "selectName": "Выберите ваше имя",
+      "you": "Ваше",
+      "ideas": "Идеи",
+      "events": "События",
+      "calendar": "Календарь",
+      "analytics": "Аналитика",
+      "viewOnly": "Вы можете просматривать содержание. Выберите ваше имя для участия."
+    },
+    "ideas": {
+      "createIdea": "Создать идею",
+      "editIdea": "Редактировать идею",
+      "deleteIdea": "Удалить идею",
+      "your": "Ваша идея",
+      "title": "Название",
+      "description": "Описание",
+      "suggestedDates": "Предлагаемые даты",
+      "location": "Место",
+      "votes": "Голоса",
+      "vote": "Голосовать",
+      "unvote": "Убрать голос",
+      "promoteToEvent": "Превратить в событие",
+      "promoted": "Уже превращено в событие",
+      "selectNameToParticipate": "Выберите ваше имя для голосования и создания идей"
+    },
+    "events": {
+      "createEvent": "Создать событие",
+      "editEvent": "Редактировать событие",
+      "deleteEvent": "Удалить событие",
+      "noEvents": "Нет событий. Создайте одно для начала!",
+      "startDate": "Дата начала",
+      "endDate": "Дата окончания",
+      "city": "Город",
+      "country": "Страна",
+      "archive": "Архив",
+      "archived": "Архивированные события",
+      "markAttending": "Отметить как посещение",
+      "unmarkAttending": "Убрать посещение",
+      "attendees": "Участники",
+      "noAttendees": "Нет участников"
+    },
+    "analytics": {
+      "yearlyChart": "События по годам",
+      "citiesMap": "Посещённые города",
+      "totalEvents": "Всего событий",
+      "totalIdeas": "Всего идей",
+      "mostActive": "Самый активный участник",
+      "eventsPerMonth": "События в месяц"
+    },
+    "validation": {
+      "groupNameRequired": "Название группы обязательно",
+      "participantNameRequired": "Имя участника обязательно",
+      "participantExists": "Это имя участника уже существует",
+      "atLeastOneParticipant": "Добавьте хотя бы одного участника",
+      "noParticipants": "Участники ещё не добавлены",
+      "titleRequired": "Название обязательно"
+    },
+    "error": {
+      "groupCreation": "Ошибка при создании группы",
+      "participantCreation": "Ошибка при добавлении участника",
+      "unauthorized": "У вас нет прав для выполнения этого действия",
+      "unknown": "Произошла неожиданная ошибка"
+    }
   }
 }
