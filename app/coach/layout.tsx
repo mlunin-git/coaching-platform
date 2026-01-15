@@ -26,6 +26,7 @@ function CoachLayoutContent({
   const navItems: Array<{ label: string; href: string; badge?: number }> = [
     { label: t("coach.clients"), href: "/coach/clients" },
     { label: `📨 ${t("coach.messages")}`, href: "/coach/messages", badge: unreadCount },
+    { label: `📅 ${t("planning.title", "Year Planning")}`, href: "/planning/admin" },
     { label: `🛠️ ${t("apps.title")}`, href: "/apps" },
   ];
 

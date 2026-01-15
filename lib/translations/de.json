@@ -362,5 +362,86 @@
       "addSector": "Sektor hinzufügen",
       "cancel": "Abbrechen"
     }
+  },
+  "planning": {
+    "title": "Jahresplanung",
+    "admin": {
+      "createGroup": "Planungsgruppe erstellen",
+      "manage": "Verwalten",
+      "groupName": "Gruppennname",
+      "participants": "Teilnehmer",
+      "addParticipant": "Teilnehmer hinzufügen",
+      "participantColor": "Farbe",
+      "shareLink": "Teilbarer Link",
+      "copyLink": "Link kopieren",
+      "copied": "Kopiert!",
+      "editGroup": "Gruppe bearbeiten",
+      "deleteGroup": "Gruppe löschen",
+      "deleteConfirm": "Sind Sie sicher, dass Sie diese Gruppe und alle ihre Daten löschen möchten?",
+      "noGroups": "Keine Planungsgruppen noch. Erstellen Sie eine, um zu beginnen!"
+    },
+    "participant": {
+      "selectName": "Wählen Sie Ihren Namen",
+      "you": "Dein",
+      "ideas": "Ideen",
+      "events": "Veranstaltungen",
+      "calendar": "Kalender",
+      "analytics": "Analytik",
+      "viewOnly": "Sie können Inhalte anzeigen. Wählen Sie Ihren Namen, um teilzunehmen."
+    },
+    "ideas": {
+      "createIdea": "Idee erstellen",
+      "editIdea": "Idee bearbeiten",
+      "deleteIdea": "Idee löschen",
+      "your": "Deine Idee",
+      "title": "Titel",
+      "description": "Beschreibung",
+      "suggestedDates": "Vorgeschlagene Termine",
+      "location": "Ort",
+      "votes": "Abstimmungen",
+      "vote": "Abstimmen",
+      "unvote": "Abstimmung entfernen",
+      "promoteToEvent": "Zur Veranstaltung hochstufen",
+      "promoted": "Bereits zur Veranstaltung hochgestuft",
+      "selectNameToParticipate": "Wählen Sie Ihren Namen, um abzustimmen und Ideen zu erstellen"
+    },
+    "events": {
+      "createEvent": "Veranstaltung erstellen",
+      "editEvent": "Veranstaltung bearbeiten",
+      "deleteEvent": "Veranstaltung löschen",
+      "noEvents": "Noch keine Veranstaltungen. Erstellen Sie eine, um zu beginnen!",
+      "startDate": "Startdatum",
+      "endDate": "Enddatum",
+      "city": "Stadt",
+      "country": "Land",
+      "archive": "Archiv",
+      "archived": "Archivierte Veranstaltungen",
+      "markAttending": "Als teilnehmend markieren",
+      "unmarkAttending": "Teilnahme entfernen",
+      "attendees": "Teilnehmer",
+      "noAttendees": "Noch keine Teilnehmer"
+    },
+    "analytics": {
+      "yearlyChart": "Veranstaltungen pro Jahr",
+      "citiesMap": "Besuchte Städte",
+      "totalEvents": "Veranstaltungen insgesamt",
+      "totalIdeas": "Ideen insgesamt",
+      "mostActive": "Aktivster Teilnehmer",
+      "eventsPerMonth": "Veranstaltungen pro Monat"
+    },
+    "validation": {
+      "groupNameRequired": "Gruppenname erforderlich",
+      "participantNameRequired": "Teilnehmernname erforderlich",
+      "participantExists": "Dieser Teilnehmernname existiert bereits",
+      "atLeastOneParticipant": "Fügen Sie mindestens einen Teilnehmer hinzu",
+      "noParticipants": "Noch keine Teilnehmer hinzugefügt",
+      "titleRequired": "Titel erforderlich"
+    },
+    "error": {
+      "groupCreation": "Fehler beim Erstellen der Gruppe",
+      "participantCreation": "Fehler beim Hinzufügen des Teilnehmers",
+      "unauthorized": "Sie sind nicht berechtigt, diese Aktion auszuführen",
+      "unknown": "Ein unerwarteter Fehler ist aufgetreten"
+    }
   }
 }
