@@ -11,6 +11,7 @@ export function useRealtimeMessages(
 ) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadMessages = useCallback(async () => {
     if (!clientId) {
@@ -19,13 +20,14 @@ export function useRealtimeMessages(
     }
 
     try {
+      setError(null);
       const data = await getMessages(clientId);
       setMessages(data);
 
       // Mark messages as read when viewing
       await markMessagesAsRead(clientId, currentUserType);
-    } catch (error) {
-      console.error("Error loading messages:", error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load messages");
     } finally {
       setLoading(false);
     }
@@ -53,18 +55,24 @@ export function useRealtimeMessages(
 
           // Auto-mark as read if it's from the other party
           if (payload.new.sender_type !== currentUserType) {
-            markMessagesAsRead(clientId, currentUserType).catch((error) => {
-              console.error("Error marking messages as read:", error);
+            markMessagesAsRead(clientId, currentUserType).catch((err) => {
+              setError(err instanceof Error ? err.message : "Failed to mark as read");
             });
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR") {
+          setError("Failed to subscribe to messages");
+        } else if (status === "SUBSCRIBED") {
+          setError(null);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
   }, [clientId, currentUserType, loadMessages]);
 
-  return { messages, loading, refreshMessages: loadMessages };
+  return { messages, loading, error, refreshMessages: loadMessages };
 }
