@@ -129,10 +129,10 @@ export default function ClientTasksPage() {
         status: newStatus,
         completed_at: newStatus === "completed" ? new Date().toISOString() : null,
       };
-      const { error: updateError } = await (supabase as any)
+      const { error: updateError } = await supabase
         .from("client_tasks")
         .update(updateData)
-        .eq("id", (clientTask as any).id);
+        .eq("id", clientTask.id);
 
       if (updateError) throw updateError;
 

@@ -62,7 +62,7 @@ export default function GroupPage() {
 
   // Load saved participant selection
   useEffect(() => {
-    const saved = localStorage.getItem(`planning_participant_${groupId}`);
+    const saved = sessionStorage.getItem(`planning_participant_${groupId}`);
     if (saved) {
       setSelectedParticipantId(saved);
     }
@@ -106,7 +106,7 @@ export default function GroupPage() {
 
   const handleParticipantSelect = (participantId: string) => {
     setSelectedParticipantId(participantId);
-    localStorage.setItem(`planning_participant_${groupId}`, participantId);
+    sessionStorage.setItem(`planning_participant_${groupId}`, participantId);
   };
 
   const handleDataRefresh = async () => {
