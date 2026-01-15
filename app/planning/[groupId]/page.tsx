@@ -14,6 +14,7 @@ import { AppsHeader } from "@/components/apps/AppsHeader";
 import { ParticipantSelector } from "@/components/planning/ParticipantSelector";
 import { IdeasList } from "@/components/planning/IdeasList";
 import { EventsList } from "@/components/planning/EventsList";
+import { Calendar } from "@/components/planning/Calendar";
 
 interface Participant {
   id: string;
@@ -35,12 +36,13 @@ interface Event {
   title: string;
   description: string;
   start_date: string;
+  end_date?: string;
   location: string;
   city: string;
   creator: { name: string; color: string };
 }
 
-type TabType = "ideas" | "events";
+type TabType = "ideas" | "events" | "calendar";
 
 export default function GroupPage() {
   const { t } = useLanguage();
@@ -159,19 +161,34 @@ export default function GroupPage() {
                   >
                     📅 {t("planning.participant.events")}
                   </button>
+                  <button
+                    onClick={() => setActiveTab("calendar")}
+                    className={`flex-1 px-6 py-4 font-medium transition-colors ${
+                      activeTab === "calendar"
+                        ? "text-indigo-600 border-b-2 border-indigo-600"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    🗓️ {t("planning.participant.calendar")}
+                  </button>
                 </div>
 
                 {/* Tab Content */}
                 <div className="p-6">
-                  {activeTab === "ideas" ? (
+                  {activeTab === "ideas" && (
                     <IdeasList
                       ideas={ideas}
                       groupId={groupId}
                       selectedParticipantId={selectedParticipantId}
                       onDataRefresh={handleDataRefresh}
                     />
-                  ) : (
-                    <EventsList events={events} />
+                  )}
+                  {activeTab === "events" && <EventsList events={events} />}
+                  {activeTab === "calendar" && (
+                    <Calendar
+                      events={events}
+                      participants={participants}
+                    />
                   )}
                 </div>
               </div>
