@@ -10,7 +10,6 @@ import {
   getGroupEvents,
   getGroupByToken,
 } from "@/lib/planning";
-import { AppsHeader } from "@/components/apps/AppsHeader";
 import { ParticipantSelector } from "@/components/planning/ParticipantSelector";
 import { IdeasList } from "@/components/planning/IdeasList";
 import { EventsList } from "@/components/planning/EventsList";
@@ -120,8 +119,6 @@ export default function GroupPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <AppsHeader />
-
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {loading ? (
           <div className="flex justify-center py-12">
@@ -217,15 +214,6 @@ export default function GroupPage() {
                     />
                   )}
                 </div>
-              </div>
-            )}
-
-            {/* Call to action if no participant selected */}
-            {!selectedParticipantId && (
-              <div className="bg-indigo-50 border-l-4 border-indigo-600 p-6 rounded-lg">
-                <p className="text-indigo-900">
-                  {t("planning.participant.selectName")}
-                </p>
               </div>
             )}
           </div>

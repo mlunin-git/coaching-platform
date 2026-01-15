@@ -24,6 +24,16 @@ export function ParticipantSelector({
   const { t } = useLanguage();
   const selectedName = participants.find((p) => p.id === selected)?.name;
 
+  if (participants.length === 0) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
+        <p className="text-yellow-900 font-medium">
+          ⚠️ {t("planning.validation.noParticipants")}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
       <label className="block text-sm font-medium text-gray-700 mb-3">

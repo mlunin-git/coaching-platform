@@ -6,7 +6,7 @@ import { getSupabaseClient } from "@/lib/supabase";
  */
 export function generateAccessToken(): string {
   // Generate random bytes and convert to URL-safe base64
-  const bytes = new Uint8Array(9); // 9 bytes = 12 chars in base64
+  const bytes = new Uint8Array(16); // 16 bytes = 96+ bits entropy (~21 chars in base64)
   crypto.getRandomValues(bytes);
   const token = btoa(String.fromCharCode(...bytes))
     .replace(/\+/g, "-")
@@ -47,10 +47,8 @@ export async function getGroupByToken(token: string) {
     .eq("access_token", token)
     .single();
 
-  if (error) {
-    console.error("Error fetching group:", error);
-    return null;
-  }
+  if (error) throw error;
+  if (!data) throw new Error("Group not found");
 
   return data;
 }
@@ -67,11 +65,7 @@ export async function getGroupParticipants(groupId: string) {
     .eq("group_id", groupId)
     .order("created_at", { ascending: true });
 
-  if (error) {
-    console.error("Error fetching participants:", error);
-    return [];
-  }
-
+  if (error) throw error;
   return data || [];
 }
 
@@ -92,13 +86,16 @@ export async function getGroupIdeas(groupId: string) {
     .eq("group_id", groupId)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching ideas:", error);
-    return [];
-  }
+  if (error) throw error;
 
   // Count votes in JavaScript instead of making N queries
-  return (ideas || []).map((idea: any) => ({
+  interface IdeaWithVotes {
+    id: string;
+    planning_idea_votes?: Array<{ id: string }>;
+    [key: string]: unknown;
+  }
+
+  return (ideas || []).map((idea: IdeaWithVotes) => ({
     ...idea,
     vote_count: (idea.planning_idea_votes || []).length
   }));
@@ -115,11 +112,7 @@ export async function getIdeaVoteCount(ideaId: string): Promise<number> {
     .select("id", { count: "exact" })
     .eq("idea_id", ideaId);
 
-  if (error) {
-    console.error("Error fetching vote count:", error);
-    return 0;
-  }
-
+  if (error) throw error;
   return count || 0;
 }
 
@@ -162,13 +155,15 @@ export async function getGroupEvents(groupId: string) {
     .eq("group_id", groupId)
     .order("start_date", { ascending: true });
 
-  if (error) {
-    console.error("Error fetching events:", error);
-    return [];
-  }
+  if (error) throw error;
 
   // Count attendees in JavaScript instead of making N queries
-  return (events || []).map((event: any) => ({
+  interface EventWithParticipants {
+    planning_event_participants?: Array<{ id: string }>;
+    [key: string]: unknown;
+  }
+
+  return (events || []).map((event: EventWithParticipants) => ({
     ...event,
     attendee_count: (event.planning_event_participants || []).length
   }));
@@ -190,11 +185,7 @@ export async function getActiveGroupEvents(groupId: string) {
     .eq("is_archived", false)
     .order("start_date", { ascending: true });
 
-  if (error) {
-    console.error("Error fetching active events:", error);
-    return [];
-  }
-
+  if (error) throw error;
   return data || [];
 }
 
@@ -214,11 +205,7 @@ export async function getArchivedGroupEvents(groupId: string) {
     .eq("is_archived", true)
     .order("start_date", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching archived events:", error);
-    return [];
-  }
-
+  if (error) throw error;
   return data || [];
 }
 
@@ -237,11 +224,7 @@ export async function getEventAttendees(eventId: string) {
     .eq("event_id", eventId)
     .order("created_at", { ascending: true });
 
-  if (error) {
-    console.error("Error fetching attendees:", error);
-    return [];
-  }
-
+  if (error) throw error;
   return data || [];
 }
 
