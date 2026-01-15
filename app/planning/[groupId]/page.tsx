@@ -59,6 +59,7 @@ export default function GroupPage() {
   const [activeTab, setActiveTab] = useState<TabType>("ideas");
   const [loading, setLoading] = useState(true);
   const [groupName, setGroupName] = useState("");
+  const [actualGroupId, setActualGroupId] = useState<string | null>(null);
 
   // Load saved participant selection
   useEffect(() => {
@@ -74,19 +75,23 @@ export default function GroupPage() {
       setLoading(true);
 
       try {
-        // Get group info
+        // Get group info by token
         const group = await getGroupByToken(groupId);
-        if (group) {
-          setGroupName(group.name);
+        if (!group) {
+          setLoading(false);
+          return;
         }
 
-        // Get participants
-        const participantsData = await getGroupParticipants(groupId);
+        setGroupName(group.name);
+        setActualGroupId(group.id);
+
+        // Get participants using actual group ID
+        const participantsData = await getGroupParticipants(group.id);
         setParticipants(participantsData);
 
-        // Get ideas and events
-        const ideasData = await getGroupIdeas(groupId);
-        const eventsData = await getGroupEvents(groupId);
+        // Get ideas and events using actual group ID
+        const ideasData = await getGroupIdeas(group.id);
+        const eventsData = await getGroupEvents(group.id);
 
         setIdeas(ideasData as unknown as Idea[]);
         setEvents(eventsData as unknown as Event[]);
@@ -106,8 +111,9 @@ export default function GroupPage() {
   };
 
   const handleDataRefresh = async () => {
-    const ideasData = await getGroupIdeas(groupId);
-    const eventsData = await getGroupEvents(groupId);
+    if (!actualGroupId) return;
+    const ideasData = await getGroupIdeas(actualGroupId);
+    const eventsData = await getGroupEvents(actualGroupId);
     setIdeas(ideasData as unknown as Idea[]);
     setEvents(eventsData as unknown as Event[]);
   };
