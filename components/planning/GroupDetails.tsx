@@ -47,9 +47,13 @@ export function GroupDetails({
     fetchParticipants();
   }, [group.id]);
 
-  const handleParticipantAdded = async () => {
+  const refreshParticipants = async () => {
     const data = await getGroupParticipants(group.id);
     setParticipants(data);
+  };
+
+  const handleParticipantAdded = async () => {
+    await refreshParticipants();
   };
 
   const handleDeleteParticipant = async (participantId: string) => {
@@ -60,8 +64,7 @@ export function GroupDetails({
       .eq("id", participantId);
 
     if (!error) {
-      const data = await getGroupParticipants(group.id);
-      setParticipants(data);
+      await refreshParticipants();
     }
   };
 
@@ -100,7 +103,6 @@ export function GroupDetails({
         <ParticipantManager
           groupId={group.id}
           onParticipantAdded={handleParticipantAdded}
-          onParticipantRemoved={handleParticipantRemoved}
         />
 
         {loading ? (
