@@ -15,6 +15,7 @@ import { ParticipantSelector } from "@/components/planning/ParticipantSelector";
 import { IdeasList } from "@/components/planning/IdeasList";
 import { EventsList } from "@/components/planning/EventsList";
 import { Calendar } from "@/components/planning/Calendar";
+import { Analytics } from "@/components/planning/Analytics";
 
 interface Participant {
   id: string;
@@ -39,10 +40,12 @@ interface Event {
   end_date?: string;
   location: string;
   city: string;
+  country: string;
+  is_archived: boolean;
   creator: { name: string; color: string };
 }
 
-type TabType = "ideas" | "events" | "calendar";
+type TabType = "ideas" | "events" | "calendar" | "analytics";
 
 export default function GroupPage() {
   const { t } = useLanguage();
@@ -171,6 +174,16 @@ export default function GroupPage() {
                   >
                     🗓️ {t("planning.participant.calendar")}
                   </button>
+                  <button
+                    onClick={() => setActiveTab("analytics")}
+                    className={`flex-1 px-6 py-4 font-medium transition-colors ${
+                      activeTab === "analytics"
+                        ? "text-indigo-600 border-b-2 border-indigo-600"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    📊 {t("planning.participant.analytics", "Analytics")}
+                  </button>
                 </div>
 
                 {/* Tab Content */}
@@ -187,6 +200,13 @@ export default function GroupPage() {
                   {activeTab === "calendar" && (
                     <Calendar
                       events={events}
+                      participants={participants}
+                    />
+                  )}
+                  {activeTab === "analytics" && (
+                    <Analytics
+                      events={events}
+                      ideas={ideas}
                       participants={participants}
                     />
                   )}
