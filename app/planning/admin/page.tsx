@@ -24,36 +24,55 @@ export default function AdminPage() {
     setLoading(true);
     const supabase = getSupabaseClient();
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    try {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-    if (!session) return;
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        setLoading(false);
+        return;
+      }
 
-    // Get coach's user ID
-    const { data: userData } = await supabase
-      .from("users")
-      .select("id")
-      .eq("auth_user_id", session.user.id)
-      .single();
+      if (!session?.user?.id) {
+        setLoading(false);
+        return;
+      }
 
-    if (!userData) {
+      // Get coach's user ID
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_user_id", session.user.id)
+        .single()
+        .timeout(5000);
+
+      if (userError || !userData) {
+        console.error("User lookup error:", userError);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch coach's groups
+      const { data, error } = await supabase
+        .from("planning_groups")
+        .select("*")
+        .eq("coach_id", userData.id)
+        .order("created_at", { ascending: false })
+        .timeout(5000);
+
+      if (error) {
+        console.error("Groups fetch error:", error);
+      } else {
+        setGroups(data || []);
+      }
+    } catch (err) {
+      console.error("Planning admin error:", err);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Fetch coach's groups
-    const { data, error } = await supabase
-      .from("planning_groups")
-      .select("*")
-      .eq("coach_id", userData.id)
-      .order("created_at", { ascending: false });
-
-    if (!error) {
-      setGroups(data || []);
-    }
-
-    setLoading(false);
   };
 
   useEffect(() => {

@@ -30,24 +30,53 @@ export default function ClientsPage() {
   const [error, setError] = useState("");
 
   const loadClients = useCallback(async () => {
+    let isMounted = true;
+
     setLoading(true);
+    setError("");
+
     try {
       const supabase = getSupabaseClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
 
-      if (!user) return;
+      // Check authentication first
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        if (isMounted) {
+          setError(`Authentication error: ${sessionError.message}`);
+        }
+        return;
+      }
+
+      if (!session?.user?.id) {
+        if (isMounted) {
+          setError("Not authenticated");
+        }
+        return;
+      }
 
       // Get coach's user record
       const { data: coachUser, error: coachError } = await supabase
         .from("users")
         .select("id")
-        .eq("auth_user_id", user.id)
-        .single();
+        .eq("auth_user_id", session.user.id)
+        .single()
+        .timeout(5000);
 
-      if (coachError || !coachUser) {
-        setError("Coach profile not found");
+      if (coachError) {
+        if (isMounted) {
+          setError(`Failed to load coach profile: ${coachError.message}`);
+        }
+        return;
+      }
+
+      if (!coachUser?.id) {
+        if (isMounted) {
+          setError("Coach profile not found");
+        }
         return;
       }
 
@@ -64,9 +93,15 @@ export default function ClientsPage() {
           )
         `
         )
-        .eq("coach_id", coachUser.id);
+        .eq("coach_id", coachUser.id)
+        .timeout(5000);
 
-      if (clientsError) throw clientsError;
+      if (clientsError) {
+        if (isMounted) {
+          setError(`Failed to load clients: ${clientsError.message}`);
+        }
+        return;
+      }
 
       // Flatten the data structure
       const enrichedClients = (data || []).map((client: ClientWithUser) => ({
@@ -76,16 +111,31 @@ export default function ClientsPage() {
         has_auth_access: client.user?.has_auth_access,
       }));
 
-      setClients(enrichedClients);
+      if (isMounted) {
+        setClients(enrichedClients);
+        setError("");
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load clients");
+      if (isMounted) {
+        setError(err instanceof Error ? err.message : "Failed to load clients");
+      }
     } finally {
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
     }
+
+    // Return cleanup function
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    loadClients();
+    const cleanup = loadClients();
+    return () => {
+      cleanup?.then((fn) => fn?.());
+    };
   }, [loadClients]);
 
   return (

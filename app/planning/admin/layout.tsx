@@ -30,9 +30,11 @@ export default function AdminLayout({
         .select("*")
         .eq("auth_user_id", session.user.id)
         .single()
+        .timeout(5000)
         .then(({ data, error }) => {
           const userData = data as User | null;
           if (error || !userData || userData.role !== "coach") {
+            console.error("Planning admin auth error:", error);
             router.push("/auth/login");
           } else {
             setUser(userData);

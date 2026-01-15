@@ -30,10 +30,14 @@ export function AddClientForm({
     setError("");
     setGeneratedClientId("");
 
+    // Trim inputs before validation
+    const trimmedName = newClientName.trim();
+    const trimmedEmail = newClientEmail.trim();
+
     // Validate input on client side first
     const validation = validateClientCreation(
-      newClientName,
-      useEmail ? newClientEmail : undefined
+      trimmedName,
+      useEmail ? trimmedEmail : undefined
     );
     if (!validation.valid) {
       setError(validation.errors[0].message);
@@ -45,16 +49,22 @@ export function AddClientForm({
       const supabase = getSupabaseClient();
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
 
-      if (!user) throw new Error("Not authenticated");
+      if (userError) {
+        throw new Error("Failed to get user: " + userError.message);
+      }
+
+      if (!user?.id) throw new Error("Not authenticated");
 
       // Get coach's user record
       const { data: coachUser, error: coachError } = await supabase
         .from("users")
         .select("id")
         .eq("auth_user_id", user.id)
-        .single();
+        .single()
+        .timeout(5000);
 
       if (coachError || !coachUser) throw new Error("Coach not found");
 
@@ -68,29 +78,30 @@ export function AddClientForm({
 
         const { data: authData, error: signUpError } = await supabase.auth.signUp(
           {
-            email: newClientEmail,
+            email: trimmedEmail,
             password: securePassword,
           }
         );
 
         if (signUpError) throw signUpError;
-        if (!authData.user) throw new Error("Failed to create auth user");
+        if (!authData.user?.id) throw new Error("Failed to create auth user");
 
         // Create user profile
         const { data: newUser, error: profileError } = await supabase
           .from("users")
           .insert({
             auth_user_id: authData.user.id,
-            email: newClientEmail,
-            name: newClientName,
+            email: trimmedEmail,
+            name: trimmedName,
             role: "client",
             has_auth_access: true,
             client_identifier: null,
           })
           .select()
-          .single();
+          .single()
+          .timeout(5000);
 
-        if (profileError) throw profileError;
+        if (profileError || !newUser) throw profileError || new Error("Failed to create user profile");
         newUserId = newUser.id;
       } else {
         // === CLIENT WITHOUT EMAIL (new flow) ===
@@ -99,6 +110,10 @@ export function AddClientForm({
         );
         clientIdentifier = await generateClientIdentifier(coachUser.id, supabase);
 
+        if (!clientIdentifier) {
+          throw new Error("Failed to generate client identifier");
+        }
+
         // Create user profile WITHOUT Supabase Auth
         const { data: newUser, error: profileError } = await supabase
           .from("users")
@@ -106,14 +121,15 @@ export function AddClientForm({
             auth_user_id: null,
             email: null,
             client_identifier: clientIdentifier,
-            name: newClientName,
+            name: trimmedName,
             role: "client",
             has_auth_access: false,
           })
           .select()
-          .single();
+          .single()
+          .timeout(5000);
 
-        if (profileError) throw profileError;
+        if (profileError || !newUser) throw profileError || new Error("Failed to create user profile");
         newUserId = newUser.id;
         setGeneratedClientId(clientIdentifier);
       }
@@ -124,8 +140,9 @@ export function AddClientForm({
         .insert({
           coach_id: coachUser.id,
           user_id: newUserId,
-          name: newClientName,
-        });
+          name: trimmedName,
+        })
+        .timeout(5000);
 
       if (clientError) throw clientError;
 

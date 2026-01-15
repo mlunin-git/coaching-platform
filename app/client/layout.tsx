@@ -33,9 +33,11 @@ export default function ClientLayout({
         .select("*")
         .eq("auth_user_id", session.user.id)
         .single()
+        .timeout(5000)
         .then(({ data, error }) => {
           const userData = data as Database["public"]["Tables"]["users"]["Row"] | null;
           if (error || !userData || userData.role !== "client" || !userData.has_auth_access) {
+            console.error("Client layout auth error:", error);
             router.push("/auth/login");
           } else {
             setUser(userData);

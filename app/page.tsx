@@ -12,19 +12,32 @@ export default function Home() {
     const checkAuth = async () => {
       const supabase = getSupabaseClient();
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        router.push("/apps");
+        setLoading(false);
+        return;
+      }
+
+      if (session?.user?.id) {
         // Get user role from database
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("users")
           .select("role")
-          .eq("id", session.user.id)
-          .single();
+          .eq("auth_user_id", session.user.id)
+          .single()
+          .timeout(5000);
 
-        if (data?.role === "coach") {
+        if (error) {
+          console.error("User lookup error:", error);
+          router.push("/apps");
+        } else if (data?.role === "coach") {
           router.push("/coach/clients");
         } else if (data?.role === "client") {
           router.push("/client/tasks");
+        } else {
+          router.push("/apps");
         }
       } else {
         router.push("/apps");

@@ -5,161 +5,303 @@ type Message = Database["public"]["Tables"]["messages"]["Row"];
 
 /**
  * Get all messages for a specific client-coach conversation
+ * @param clientId - The ID of the client
+ * @returns Array of messages ordered by creation time
+ * @throws Error with descriptive message if query fails
  */
 export async function getMessages(clientId: string): Promise<Message[]> {
-  const supabase = getSupabaseClient();
+  if (!clientId) {
+    throw new Error('clientId is required');
+  }
 
-  const { data, error } = await supabase
-    .from("messages")
-    .select("*")
-    .eq("client_id", clientId)
-    .order("created_at", { ascending: true });
+  // Validate UUID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(clientId)) {
+    throw new Error('Invalid clientId format');
+  }
 
-  if (error) throw error;
-  return data as Message[];
+  try {
+    const supabase = getSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("client_id", clientId)
+      .order("created_at", { ascending: true })
+      .timeout(5000);  // 5 second timeout
+
+    if (error) {
+      throw new Error(`Failed to fetch messages for client ${clientId}: ${error.message}`);
+    }
+
+    // Validate response is array
+    if (!Array.isArray(data)) {
+      throw new Error('Invalid response: expected array of messages');
+    }
+
+    return data as Message[];
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Failed to fetch messages: ${String(error)}`);
+  }
 }
 
 /**
  * Send a message in a conversation
+ * @param clientId - The ID of the client
+ * @param content - Message content
+ * @param senderType - Who is sending ("coach" or "client")
+ * @returns The created message
+ * @throws Error if message send fails
  */
 export async function sendMessage(
   clientId: string,
   content: string,
   senderType: "coach" | "client"
 ): Promise<Message> {
-  const supabase = getSupabaseClient();
+  if (!clientId || !content || !senderType) {
+    throw new Error('clientId, content, and senderType are required');
+  }
 
-  const { data, error } = await supabase
-    .from("messages")
-    .insert({
-      client_id: clientId,
-      sender_type: senderType,
-      content,
-      is_read: false,
-    })
-    .select()
-    .single();
+  if (content.length > 10000) {
+    throw new Error('Message content exceeds maximum length of 10000 characters');
+  }
 
-  if (error) throw error;
-  return data as Message;
+  if (senderType !== "coach" && senderType !== "client") {
+    throw new Error('senderType must be "coach" or "client"');
+  }
+
+  try {
+    const supabase = getSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        client_id: clientId,
+        sender_type: senderType,
+        content,
+        is_read: false,
+      })
+      .select()
+      .single()
+      .timeout(5000);
+
+    if (error) {
+      throw new Error(`Failed to send message: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error('No message returned after insert');
+    }
+
+    return data as Message;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Failed to send message: ${String(error)}`);
+  }
 }
 
 /**
  * Mark messages as read for the current user
  * Only marks messages sent by the OTHER party as read
+ * @param clientId - The ID of the client
+ * @param currentUserType - Type of the current user
+ * @throws Error if operation fails
  */
 export async function markMessagesAsRead(
   clientId: string,
   currentUserType: "coach" | "client"
 ): Promise<void> {
-  const supabase = getSupabaseClient();
+  if (!clientId) {
+    throw new Error('clientId is required');
+  }
 
-  // Mark messages sent by the OTHER party as read
-  const senderTypeToMarkRead = currentUserType === "coach" ? "client" : "coach";
+  if (currentUserType !== "coach" && currentUserType !== "client") {
+    throw new Error('currentUserType must be "coach" or "client"');
+  }
 
-  const { error } = await supabase
-    .from("messages")
-    .update({
-      is_read: true,
-      read_at: new Date().toISOString(),
-    })
-    .eq("client_id", clientId)
-    .eq("sender_type", senderTypeToMarkRead)
-    .eq("is_read", false);
+  try {
+    const supabase = getSupabaseClient();
 
-  if (error) throw error;
+    // Mark messages sent by the OTHER party as read
+    const senderTypeToMarkRead = currentUserType === "coach" ? "client" : "coach";
+
+    const { error } = await supabase
+      .from("messages")
+      .update({
+        is_read: true,
+        read_at: new Date().toISOString(),
+      })
+      .eq("client_id", clientId)
+      .eq("sender_type", senderTypeToMarkRead)
+      .eq("is_read", false)
+      .timeout(5000);
+
+    if (error) {
+      throw new Error(`Failed to mark messages as read: ${error.message}`);
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Failed to mark messages as read: ${String(error)}`);
+  }
 }
 
 /**
  * Get unread message count for a user
+ * @param userId - The ID of the user
+ * @param userRole - Role of the user ("coach" or "client")
+ * @returns Count of unread messages
  */
 export async function getUnreadCount(
   userId: string,
   userRole: "coach" | "client"
 ): Promise<number> {
-  const supabase = getSupabaseClient();
+  if (!userId) {
+    return 0;
+  }
 
-  if (userRole === "coach") {
-    // For coaches: count unread messages from ALL their clients
-    const { data: clientsData, error: clientsError } = await supabase
-      .from("clients")
-      .select("id")
-      .eq("coach_id", userId);
+  if (userRole !== "coach" && userRole !== "client") {
+    throw new Error('userRole must be "coach" or "client"');
+  }
 
-    if (clientsError) throw clientsError;
+  try {
+    const supabase = getSupabaseClient();
 
-    const clientIds = (clientsData || []).map((c) => c.id);
-    if (clientIds.length === 0) return 0;
+    if (userRole === "coach") {
+      // For coaches: count unread messages from ALL their clients
+      const { data: clientsData, error: clientsError } = await supabase
+        .from("clients")
+        .select("id")
+        .eq("coach_id", userId)
+        .timeout(5000);
 
-    const { count, error } = await supabase
-      .from("messages")
-      .select("id", { count: "exact", head: true })
-      .eq("sender_type", "client")
-      .eq("is_read", false)
-      .in("client_id", clientIds);
+      if (clientsError) {
+        console.error('Failed to fetch coach clients:', clientsError);
+        throw new Error(`Failed to fetch clients: ${clientsError.message}`);
+      }
 
-    if (error) throw error;
-    return count || 0;
-  } else {
-    // For clients: count unread messages from their coach
-    const { data: clientData, error: clientError } = await supabase
-      .from("clients")
-      .select("id")
-      .eq("user_id", userId)
-      .single();
+      const clientIds = (clientsData || []).map((c) => c.id);
+      if (clientIds.length === 0) return 0;
 
-    if (clientError) return 0;
-    if (!clientData) return 0;
+      const { count, error } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("sender_type", "client")
+        .eq("is_read", false)
+        .in("client_id", clientIds)
+        .timeout(5000);
 
-    const clientId = clientData?.id;
-    if (!clientId) return 0;
+      if (error) {
+        console.error('Failed to count unread messages:', error);
+        throw new Error(`Failed to count messages: ${error.message}`);
+      }
 
-    const { count, error } = await supabase
-      .from("messages")
-      .select("id", { count: "exact", head: true })
-      .eq("client_id", clientId)
-      .eq("sender_type", "coach")
-      .eq("is_read", false);
+      return count ?? 0;
+    } else {
+      // For clients: count unread messages from their coach
+      const { data: clientData, error: clientError } = await supabase
+        .from("clients")
+        .select("id")
+        .eq("user_id", userId)
+        .single()
+        .timeout(5000);
 
-    if (error) throw error;
-    return count || 0;
+      if (clientError) {
+        // Client record not found is not a critical error
+        console.warn('Client record not found for user:', userId);
+        return 0;
+      }
+
+      if (!clientData?.id) {
+        return 0;
+      }
+
+      const { count, error } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("client_id", clientData.id)
+        .eq("sender_type", "coach")
+        .eq("is_read", false)
+        .timeout(5000);
+
+      if (error) {
+        console.error('Failed to count client unread messages:', error);
+        throw new Error(`Failed to count messages: ${error.message}`);
+      }
+
+      return count ?? 0;
+    }
+  } catch (error) {
+    console.error('Error getting unread count:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Failed to get unread count: ${String(error)}`);
   }
 }
 
 /**
  * Get unread counts per client (for coach dashboard)
+ * @param coachUserId - The ID of the coach
+ * @returns Object mapping client IDs to unread counts
  */
 export async function getUnreadCountsByClient(
   coachUserId: string
 ): Promise<Record<string, number>> {
-  const supabase = getSupabaseClient();
+  if (!coachUserId) {
+    return {};
+  }
 
-  // Get all client IDs for this coach
-  const { data: clientsData, error: clientsError } = await supabase
-    .from("clients")
-    .select("id")
-    .eq("coach_id", coachUserId);
+  try {
+    const supabase = getSupabaseClient();
 
-  if (clientsError) throw clientsError;
+    // Get all client IDs for this coach
+    const { data: clientsData, error: clientsError } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("coach_id", coachUserId)
+      .timeout(5000);
 
-  const clientIds = (clientsData || []).map((c) => c.id);
-  if (clientIds.length === 0) return {};
+    if (clientsError) {
+      console.error('Failed to fetch coach clients for unread counts:', clientsError);
+      throw new Error(`Failed to fetch clients: ${clientsError.message}`);
+    }
 
-  // Get all unread messages from clients
-  const { data, error } = await supabase
-    .from("messages")
-    .select("client_id")
-    .eq("sender_type", "client")
-    .eq("is_read", false)
-    .in("client_id", clientIds);
+    const clientIds = (clientsData || []).map((c) => c.id);
+    if (clientIds.length === 0) return {};
 
-  if (error) throw error;
+    // Get all unread messages from clients
+    const { data, error } = await supabase
+      .from("messages")
+      .select("client_id")
+      .eq("sender_type", "client")
+      .eq("is_read", false)
+      .in("client_id", clientIds)
+      .timeout(5000);
 
-  // Count messages per client
-  const counts: Record<string, number> = {};
-  (data || []).forEach((msg) => {
-    counts[msg.client_id] = (counts[msg.client_id] || 0) + 1;
-  });
+    if (error) {
+      console.error('Failed to fetch unread messages:', error);
+      throw new Error(`Failed to fetch messages: ${error.message}`);
+    }
 
-  return counts;
+    // Count messages per client
+    const counts: Record<string, number> = {};
+    (data || []).forEach((msg: { client_id: string }) => {
+      counts[msg.client_id] = (counts[msg.client_id] || 0) + 1;
+    });
+
+    return counts;
+  } catch (error) {
+    console.error('Error getting unread counts by client:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Failed to get unread counts: ${String(error)}`);
+  }
 }

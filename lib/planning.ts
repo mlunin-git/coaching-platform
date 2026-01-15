@@ -71,34 +71,69 @@ export async function getGroupParticipants(groupId: string) {
 
 /**
  * Get all ideas for a group with vote counts
+ * @param groupId - The ID of the planning group
+ * @returns Array of ideas with vote counts
+ * @throws Error if query fails
  */
 export async function getGroupIdeas(groupId: string) {
-  const supabase = getSupabaseClient();
-
-  const { data: ideas, error } = await supabase
-    .from("planning_ideas")
-    .select(`
-      *,
-      participant:planning_participants(name, color),
-      promoted_event:planning_events(id, title),
-      planning_idea_votes(id)
-    `)
-    .eq("group_id", groupId)
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-
-  // Count votes in JavaScript instead of making N queries
-  interface IdeaWithVotes {
-    id: string;
-    planning_idea_votes?: Array<{ id: string }>;
-    [key: string]: unknown;
+  if (!groupId) {
+    throw new Error('groupId is required');
   }
 
-  return (ideas || []).map((idea: IdeaWithVotes) => ({
-    ...idea,
-    vote_count: (idea.planning_idea_votes || []).length
-  }));
+  try {
+    const supabase = getSupabaseClient();
+
+    const { data: ideas, error } = await supabase
+      .from("planning_ideas")
+      .select(`
+        *,
+        participant:planning_participants(name, color),
+        promoted_event:planning_events(id, title),
+        planning_idea_votes(id)
+      `)
+      .eq("group_id", groupId)
+      .order("created_at", { ascending: false })
+      .timeout(5000);
+
+    if (error) {
+      throw new Error(`Failed to fetch ideas: ${error.message}`);
+    }
+
+    if (!Array.isArray(ideas)) {
+      throw new Error('Invalid response: expected array of ideas');
+    }
+
+    // Count votes in JavaScript instead of making N queries
+    interface IdeaWithVotes {
+      id: string;
+      title: string;
+      description?: string;
+      group_id: string;
+      participant_id: string;
+      promoted_to_event_id?: string;
+      created_at: string;
+      updated_at: string;
+      participant?: { name: string; color?: string };
+      promoted_event?: { id: string; title: string };
+      planning_idea_votes?: Array<{ id: string }>;
+    }
+
+    return ideas.map((idea: unknown) => {
+      const ideaData = idea as IdeaWithVotes;
+
+      return {
+        ...ideaData,
+        vote_count: Array.isArray(ideaData.planning_idea_votes)
+          ? ideaData.planning_idea_votes.length
+          : 0,
+      };
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Failed to get group ideas: ${String(error)}`);
+  }
 }
 
 /**
@@ -141,32 +176,72 @@ export async function hasParticipantVoted(
 
 /**
  * Get all events for a group with attendee counts
+ * @param groupId - The ID of the planning group
+ * @returns Array of events with attendee counts
+ * @throws Error if query fails
  */
 export async function getGroupEvents(groupId: string) {
-  const supabase = getSupabaseClient();
-
-  const { data: events, error } = await supabase
-    .from("planning_events")
-    .select(`
-      *,
-      creator:planning_participants(name, color),
-      planning_event_participants(id)
-    `)
-    .eq("group_id", groupId)
-    .order("start_date", { ascending: true });
-
-  if (error) throw error;
-
-  // Count attendees in JavaScript instead of making N queries
-  interface EventWithParticipants {
-    planning_event_participants?: Array<{ id: string }>;
-    [key: string]: unknown;
+  if (!groupId) {
+    throw new Error('groupId is required');
   }
 
-  return (events || []).map((event: EventWithParticipants) => ({
-    ...event,
-    attendee_count: (event.planning_event_participants || []).length
-  }));
+  try {
+    const supabase = getSupabaseClient();
+
+    const { data: events, error } = await supabase
+      .from("planning_events")
+      .select(`
+        *,
+        creator:planning_participants(name, color),
+        planning_event_participants(id)
+      `)
+      .eq("group_id", groupId)
+      .order("start_date", { ascending: true })
+      .timeout(5000);
+
+    if (error) {
+      throw new Error(`Failed to fetch events: ${error.message}`);
+    }
+
+    if (!Array.isArray(events)) {
+      throw new Error('Invalid response: expected array of events');
+    }
+
+    // Count attendees in JavaScript instead of making N queries
+    interface EventWithParticipants {
+      id: string;
+      group_id: string;
+      created_by?: string;
+      title: string;
+      description?: string;
+      start_date: string;
+      end_date?: string;
+      location?: string;
+      city?: string;
+      country?: string;
+      is_archived: boolean;
+      created_at: string;
+      updated_at: string;
+      creator?: { name: string; color?: string };
+      planning_event_participants?: Array<{ id: string }>;
+    }
+
+    return events.map((event: unknown) => {
+      const eventData = event as EventWithParticipants;
+
+      return {
+        ...eventData,
+        attendee_count: Array.isArray(eventData.planning_event_participants)
+          ? eventData.planning_event_participants.length
+          : 0,
+      };
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Failed to get group events: ${String(error)}`);
+  }
 }
 
 /**

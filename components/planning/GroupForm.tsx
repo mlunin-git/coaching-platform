@@ -32,12 +32,20 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
   const [error, setError] = useState("");
 
   const addParticipant = () => {
-    if (!newParticipantName.trim()) {
+    const trimmedName = newParticipantName.trim();
+
+    if (!trimmedName) {
       setError(t("planning.validation.participantNameRequired"));
       return;
     }
 
-    if (participants.some((p) => p.name === newParticipantName)) {
+    if (trimmedName.length > 100) {
+      setError(t("planning.validation.participantNameTooLong"));
+      return;
+    }
+
+    // Case-insensitive duplicate check
+    if (participants.some((p) => p.name.toLowerCase() === trimmedName.toLowerCase())) {
       setError(t("planning.validation.participantExists"));
       return;
     }
@@ -45,7 +53,7 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
     const colorIndex = participants.length % DEFAULT_COLORS.length;
     setParticipants([
       ...participants,
-      { name: newParticipantName, color: DEFAULT_COLORS[colorIndex] },
+      { name: trimmedName, color: DEFAULT_COLORS[colorIndex] },
     ]);
     setNewParticipantName("");
     setError("");
@@ -59,8 +67,15 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
     e.preventDefault();
     setError("");
 
-    if (!groupName.trim()) {
+    const trimmedGroupName = groupName.trim();
+
+    if (!trimmedGroupName) {
       setError(t("planning.validation.groupNameRequired"));
+      return;
+    }
+
+    if (trimmedGroupName.length > 255) {
+      setError(t("planning.validation.groupNameTooLong"));
       return;
     }
 
@@ -77,22 +92,30 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
       // Get current user
       const {
         data: { session },
+        error: sessionError,
       } = await supabase.auth.getSession();
 
-      if (!session) {
+      if (sessionError) {
+        setError(t("planning.error.unauthorized"));
+        setLoading(false);
+        return;
+      }
+
+      if (!session?.user?.id) {
         setError(t("planning.error.unauthorized"));
         setLoading(false);
         return;
       }
 
       // Get coach's user ID
-      const { data: userData } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from("users")
         .select("id")
         .eq("auth_user_id", session.user.id)
-        .single();
+        .single()
+        .timeout(5000);
 
-      if (!userData) {
+      if (userError || !userData) {
         setError(t("planning.error.unauthorized"));
         setLoading(false);
         return;
@@ -106,13 +129,15 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
         .from("planning_groups")
         .insert({
           coach_id: userData.id,
-          name: groupName,
+          name: trimmedGroupName,
           access_token: accessToken,
         })
         .select()
-        .single();
+        .single()
+        .timeout(5000);
 
       if (groupError || !groupData) {
+        console.error("Group creation error:", groupError);
         setError(t("planning.error.groupCreation"));
         setLoading(false);
         return;
@@ -127,9 +152,11 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
 
       const { error: participantError } = await supabase
         .from("planning_participants")
-        .insert(participantInserts);
+        .insert(participantInserts)
+        .timeout(5000);
 
       if (participantError) {
+        console.error("Participant creation error:", participantError);
         setError(t("planning.error.participantCreation"));
         setLoading(false);
         return;
@@ -138,6 +165,7 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
       setLoading(false);
       onSuccess();
     } catch (err) {
+      console.error("Group form error:", err);
       setError(t("planning.error.unknown"));
       setLoading(false);
     }

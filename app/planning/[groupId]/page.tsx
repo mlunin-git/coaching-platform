@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getSupabaseClient } from "@/lib/supabase";
+import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import {
   getGroupParticipants,
   getGroupIdeas,
@@ -68,40 +69,67 @@ export default function GroupPage() {
     }
   }, [groupId]);
 
+  const [error, setError] = useState<string | null>(null);
+
   // Fetch group data
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
+      let isMounted = true;
+
+      if (!isMounted) setLoading(true);
 
       try {
         // Get group info by token
         const group = await getGroupByToken(groupId);
         if (!group) {
-          setLoading(false);
+          if (isMounted) {
+            setError("Planning group not found");
+            setLoading(false);
+          }
           return;
         }
 
-        setGroupName(group.name);
-        setActualGroupId(group.id);
+        if (isMounted) {
+          setGroupName(group.name);
+          setActualGroupId(group.id);
+        }
 
         // Get participants using actual group ID
         const participantsData = await getGroupParticipants(group.id);
-        setParticipants(participantsData);
+        if (isMounted) {
+          setParticipants(participantsData);
+        }
 
         // Get ideas and events using actual group ID
         const ideasData = await getGroupIdeas(group.id);
         const eventsData = await getGroupEvents(group.id);
 
-        setIdeas(ideasData);
-        setEvents(eventsData);
-      } catch (error) {
-        // Error fetching group data - loading failed
+        if (isMounted) {
+          setIdeas(ideasData);
+          setEvents(eventsData);
+          setError(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          const errorMessage = err instanceof Error ? err.message : "Failed to load planning group";
+          setError(errorMessage);
+          console.error("Error fetching planning group:", err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
 
-      setLoading(false);
+      return () => {
+        isMounted = false;
+      };
     };
 
-    fetchData();
+    const cleanup = fetchData();
+    return () => {
+      cleanup?.then((fn) => fn?.());
+    };
   }, [groupId]);
 
   const handleParticipantSelect = (participantId: string) => {
@@ -177,25 +205,33 @@ export default function GroupPage() {
                   ) : (
                     <>
                       {activeTab === "ideas" && actualGroupId && (
-                        <IdeasList
-                          ideas={ideas}
-                          groupId={actualGroupId}
-                          selectedParticipantId={selectedParticipantId}
-                          onDataRefresh={handleDataRefresh}
-                        />
+                        <SectionErrorBoundary section="ideas list">
+                          <IdeasList
+                            ideas={ideas}
+                            groupId={actualGroupId}
+                            selectedParticipantId={selectedParticipantId}
+                            onDataRefresh={handleDataRefresh}
+                          />
+                        </SectionErrorBoundary>
                       )}
-                      {activeTab === "events" && <EventsList events={events} />}
+                      {activeTab === "events" && (
+                        <SectionErrorBoundary section="events list">
+                          <EventsList events={events} />
+                        </SectionErrorBoundary>
+                      )}
                     </>
                   )}
                 </div>
               </div>
 
               {/* Analytics - Events per month and Cities Map */}
-              <Analytics
-                events={events}
-                ideas={ideas}
-                participants={participants}
-              />
+              <SectionErrorBoundary section="analytics">
+                <Analytics
+                  events={events}
+                  ideas={ideas}
+                  participants={participants}
+                />
+              </SectionErrorBoundary>
             </div>
 
             {/* Sidebar - Right Side (1 column) */}
