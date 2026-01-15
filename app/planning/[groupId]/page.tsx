@@ -92,8 +92,8 @@ export default function GroupPage() {
         const ideasData = await getGroupIdeas(group.id);
         const eventsData = await getGroupEvents(group.id);
 
-        setIdeas(ideasData as unknown as Idea[]);
-        setEvents(eventsData as unknown as Event[]);
+        setIdeas(ideasData);
+        setEvents(eventsData);
       } catch (error) {
         console.error("Error fetching group data:", error);
       }
@@ -113,8 +113,8 @@ export default function GroupPage() {
     if (!actualGroupId) return;
     const ideasData = await getGroupIdeas(actualGroupId);
     const eventsData = await getGroupEvents(actualGroupId);
-    setIdeas(ideasData as unknown as Idea[]);
-    setEvents(eventsData as unknown as Event[]);
+    setIdeas(ideasData);
+    setEvents(eventsData);
   };
 
   return (

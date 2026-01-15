@@ -52,9 +52,17 @@ export function GroupDetails({
     setParticipants(data);
   };
 
-  const handleParticipantRemoved = async () => {
-    const data = await getGroupParticipants(group.id);
-    setParticipants(data);
+  const handleDeleteParticipant = async (participantId: string) => {
+    const supabase = getSupabaseClient();
+    const { error } = await supabase
+      .from("planning_participants")
+      .delete()
+      .eq("id", participantId);
+
+    if (!error) {
+      const data = await getGroupParticipants(group.id);
+      setParticipants(data);
+    }
   };
 
   return (
@@ -118,7 +126,7 @@ export function GroupDetails({
                   {participant.name}
                 </span>
                 <button
-                  onClick={() => handleParticipantRemoved()}
+                  onClick={() => handleDeleteParticipant(participant.id)}
                   className="text-red-600 hover:text-red-700 font-bold text-sm"
                 >
                   {t("common.delete")}
