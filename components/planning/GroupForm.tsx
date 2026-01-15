@@ -138,7 +138,6 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
       setLoading(false);
       onSuccess();
     } catch (err) {
-      console.error("Error creating group:", err);
       setError(t("planning.error.unknown"));
       setLoading(false);
     }

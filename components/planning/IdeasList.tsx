@@ -75,8 +75,8 @@ export function IdeasList({
       }
 
       onDataRefresh();
-    } catch (error) {
-      console.error("Error voting:", error);
+    } catch {
+      // Vote action failed - silently continue
     }
 
     setLoading(false);
@@ -108,11 +108,11 @@ export function IdeasList({
       {sortedIdeas.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500">
-            {t("planning.validation.noParticipants")}
+            {t("planning.ideas.selectNameToParticipate")}
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {sortedIdeas.map((idea) => (
             <IdeaCard
               key={idea.id}

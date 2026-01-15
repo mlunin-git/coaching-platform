@@ -13,6 +13,18 @@ interface TaskWithCompletion {
   created_at: string;
 }
 
+interface ClientTaskData {
+  id: string;
+  status: "pending" | "completed";
+  completed_at: string | null;
+  tasks: {
+    id: string;
+    title: string;
+    description: string | null;
+    created_at: string;
+  };
+}
+
 export default function ClientTasksPage() {
   const router = useRouter();
   const [tasks, setTasks] = useState<TaskWithCompletion[]>([]);
@@ -69,7 +81,7 @@ export default function ClientTasksPage() {
       if (tasksError) throw tasksError;
 
       // Transform data
-      const transformedTasks = (data || []).map((item: any) => ({
+      const transformedTasks = (data || []).map((item: ClientTaskData) => ({
         id: item.tasks.id,
         clientTaskId: item.id,
         title: item.tasks.title,
@@ -217,7 +229,7 @@ export default function ClientTasksPage() {
                   }`}
                 >
                   {task.status === "completed" && (
-                    <span className="text-white text-sm">✓</span>
+                    <span className="text-white text-sm" aria-label="task completed">✓</span>
                   )}
                 </button>
 

@@ -49,7 +49,6 @@ export function IdeaForm({
         });
 
       if (insertError) {
-        console.error("Error inserting idea:", insertError);
         setError(insertError.message || t("planning.error.unknown"));
         setLoading(false);
         return;
@@ -58,7 +57,6 @@ export function IdeaForm({
       setLoading(false);
       onSuccess();
     } catch (err) {
-      console.error("Error creating idea:", err);
       setError(t("planning.error.unknown"));
       setLoading(false);
     }

@@ -10,10 +10,10 @@ import {
   getGroupEvents,
   getGroupByToken,
 } from "@/lib/planning";
-import { ParticipantSelector } from "@/components/planning/ParticipantSelector";
+import { ParticipantDropdown } from "@/components/planning/ParticipantDropdown";
+import { QuickStats } from "@/components/planning/QuickStats";
 import { IdeasList } from "@/components/planning/IdeasList";
 import { EventsList } from "@/components/planning/EventsList";
-import { Calendar } from "@/components/planning/Calendar";
 import { Analytics } from "@/components/planning/Analytics";
 
 interface Participant {
@@ -44,7 +44,7 @@ interface Event {
   creator: { name: string; color: string };
 }
 
-type TabType = "ideas" | "events" | "calendar" | "analytics";
+type TabType = "ideas" | "events";
 
 export default function GroupPage() {
   const { t } = useLanguage();
@@ -95,7 +95,7 @@ export default function GroupPage() {
         setIdeas(ideasData);
         setEvents(eventsData);
       } catch (error) {
-        console.error("Error fetching group data:", error);
+        // Error fetching group data - loading failed
       }
 
       setLoading(false);
@@ -118,32 +118,29 @@ export default function GroupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-8">
+      <main className="container mx-auto px-4 pb-8 max-w-7xl">
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* Header */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                {groupName}
-              </h1>
-              <p className="text-gray-600">{participants.length} participants</p>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Main Content - Left Side (3 columns) */}
+            <div className="lg:col-span-3 space-y-4">
+              {/* Header with Quick Stats */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h1 className="text-3xl font-bold text-gray-900 mb-6">
+                  {t("planning.title")}
+                </h1>
+                <QuickStats
+                  eventsCount={events.length}
+                  ideasCount={ideas.length}
+                  participantsCount={participants.length}
+                />
+              </div>
 
-            {/* Participant Selector */}
-            <ParticipantSelector
-              participants={participants}
-              selected={selectedParticipantId}
-              onSelect={handleParticipantSelect}
-              groupId={groupId}
-            />
-
-            {/* Tabs */}
-            {selectedParticipantId && (
+              {/* Ideas and Events Tabs */}
               <div className="bg-white rounded-xl shadow-lg">
                 {/* Tab Navigation */}
                 <div className="flex border-b border-gray-200">
@@ -165,57 +162,55 @@ export default function GroupPage() {
                         : "text-gray-600 hover:text-gray-900"
                     }`}
                   >
-                    📅 {t("planning.participant.events")}
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("calendar")}
-                    className={`flex-1 px-6 py-4 font-medium transition-colors ${
-                      activeTab === "calendar"
-                        ? "text-indigo-600 border-b-2 border-indigo-600"
-                        : "text-gray-600 hover:text-gray-900"
-                    }`}
-                  >
-                    🗓️ {t("planning.participant.calendar")}
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("analytics")}
-                    className={`flex-1 px-6 py-4 font-medium transition-colors ${
-                      activeTab === "analytics"
-                        ? "text-indigo-600 border-b-2 border-indigo-600"
-                        : "text-gray-600 hover:text-gray-900"
-                    }`}
-                  >
-                    📊 {t("planning.participant.analytics", "Analytics")}
+                    📅 {t("planning.participant.scheduledEvents")}
                   </button>
                 </div>
 
                 {/* Tab Content */}
                 <div className="p-6">
-                  {activeTab === "ideas" && (
-                    <IdeasList
-                      ideas={ideas}
-                      groupId={groupId}
-                      selectedParticipantId={selectedParticipantId}
-                      onDataRefresh={handleDataRefresh}
-                    />
-                  )}
-                  {activeTab === "events" && <EventsList events={events} />}
-                  {activeTab === "calendar" && (
-                    <Calendar
-                      events={events}
-                      participants={participants}
-                    />
-                  )}
-                  {activeTab === "analytics" && (
-                    <Analytics
-                      events={events}
-                      ideas={ideas}
-                      participants={participants}
-                    />
+                  {!selectedParticipantId ? (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500">
+                        {t("planning.ideas.selectNameToParticipate")}
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {activeTab === "ideas" && actualGroupId && (
+                        <IdeasList
+                          ideas={ideas}
+                          groupId={actualGroupId}
+                          selectedParticipantId={selectedParticipantId}
+                          onDataRefresh={handleDataRefresh}
+                        />
+                      )}
+                      {activeTab === "events" && <EventsList events={events} />}
+                    </>
                   )}
                 </div>
               </div>
-            )}
+
+              {/* Analytics - Events per month and Cities Map */}
+              <Analytics
+                events={events}
+                ideas={ideas}
+                participants={participants}
+              />
+            </div>
+
+            {/* Sidebar - Right Side (1 column) */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                  {t("planning.participant.selectName")}
+                </h3>
+                <ParticipantDropdown
+                  participants={participants}
+                  selected={selectedParticipantId}
+                  onSelect={handleParticipantSelect}
+                />
+              </div>
+            </div>
           </div>
         )}
       </main>

@@ -385,6 +385,7 @@
       "you": "Dein",
       "ideas": "Ideen",
       "events": "Veranstaltungen",
+      "scheduledEvents": "Geplante Veranstaltungen",
       "calendar": "Kalender",
       "analytics": "Analytik",
       "viewOnly": "Sie können Inhalte anzeigen. Wählen Sie Ihren Namen, um teilzunehmen."
@@ -443,5 +444,9 @@
       "unauthorized": "Sie sind nicht berechtigt, diese Aktion auszuführen",
       "unknown": "Ein unerwarteter Fehler ist aufgetreten"
     }
+  },
+  "footer": {
+    "privacy": "Datenschutzrichtlinie",
+    "lastUpdated": "Zuletzt aktualisiert"
   }
 }

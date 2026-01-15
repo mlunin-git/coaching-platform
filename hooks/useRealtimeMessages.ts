@@ -5,6 +5,15 @@ import type { Database } from "@/lib/database.types";
 
 type Message = Database["public"]["Tables"]["messages"]["Row"];
 
+/**
+ * Hook to manage real-time messaging between coaches and clients
+ * Loads initial messages and subscribes to new message inserts
+ * Automatically marks messages as read when viewed
+ *
+ * @param clientId - The ID of the client for the conversation
+ * @param currentUserType - The type of user making the query ("coach" or "client")
+ * @returns Object with messages array, loading state, error, and refresh function
+ */
 export function useRealtimeMessages(
   clientId: string,
   currentUserType: "coach" | "client"

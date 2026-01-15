@@ -18,8 +18,8 @@ export function ShareLink({ accessToken }: ShareLinkProps) {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
+    } catch {
+      // Clipboard copy failed - continue silently
     }
   };
 
@@ -36,7 +36,7 @@ export function ShareLink({ accessToken }: ShareLinkProps) {
           onClick={handleCopy}
           className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors font-medium text-sm whitespace-nowrap"
         >
-          {copied ? "✓ " + t("planning.admin.copied") : t("planning.admin.copyLink")}
+          {copied ? (<><span aria-label="success">✓</span> {t("planning.admin.copied")}</>) : t("planning.admin.copyLink")}
         </button>
       </div>
     </div>

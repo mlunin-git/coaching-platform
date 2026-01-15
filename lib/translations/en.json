@@ -260,6 +260,7 @@
       "you": "Your",
       "ideas": "Ideas",
       "events": "Events",
+      "scheduledEvents": "Scheduled Events",
       "calendar": "Calendar",
       "analytics": "Analytics",
       "viewOnly": "You can view content. Select your name to participate."
@@ -299,7 +300,7 @@
     "analytics": {
       "yearlyChart": "Yearly Events",
       "citiesMap": "Visited Cities",
-      "totalEvents": "Total Events",
+      "totalEvents": "Total Events Planned",
       "totalIdeas": "Total Ideas",
       "mostActive": "Most Active Participant",
       "eventsPerMonth": "Events per Month"
@@ -318,5 +319,9 @@
       "unauthorized": "You are not authorized to perform this action",
       "unknown": "An unexpected error occurred"
     }
+  },
+  "footer": {
+    "privacy": "Privacy Policy",
+    "lastUpdated": "Last Updated"
   }
 }

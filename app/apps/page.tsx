@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { AppsHeader } from "@/components/apps/AppsHeader";
 import { WheelOfLife } from "@/components/apps/WheelOfLife";
 import { SectorEditor } from "@/components/apps/SectorEditor";
 import { EmotionMap } from "@/components/apps/EmotionMap";
@@ -155,8 +154,7 @@ export default function AppsPage() {
 
   if (selectedAppId === "emotion-map") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <AppsHeader />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-8">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
           {/* Header */}
           <div>
@@ -236,8 +234,7 @@ export default function AppsPage() {
 
   if (selectedAppId === "goal-wizard") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <AppsHeader />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-8">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           <button
             onClick={() => setSelectedAppId(null)}
@@ -257,8 +254,7 @@ export default function AppsPage() {
 
   if (selectedAppId === "gallwey-5step") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <AppsHeader />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-8">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           <button
             onClick={() => setSelectedAppId(null)}
@@ -278,8 +274,7 @@ export default function AppsPage() {
 
   if (selectedAppId === "secondary-gains") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <AppsHeader />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-8">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           <button
             onClick={() => setSelectedAppId(null)}
@@ -299,8 +294,7 @@ export default function AppsPage() {
 
   if (selectedAppId === "limiting-beliefs") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <AppsHeader />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-8">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           <button
             onClick={() => setSelectedAppId(null)}
@@ -320,8 +314,7 @@ export default function AppsPage() {
 
   if (selectedAppId === "ecology") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <AppsHeader />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-8">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           <button
             onClick={() => setSelectedAppId(null)}
@@ -341,8 +334,7 @@ export default function AppsPage() {
 
   if (selectedAppId === "logical-levels") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <AppsHeader />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-8">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           <button
             onClick={() => setSelectedAppId(null)}
@@ -362,8 +354,7 @@ export default function AppsPage() {
 
   if (selectedAppId === "wheel-of-life") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <AppsHeader />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-8">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
           {/* Header */}
           <div>
@@ -546,8 +537,7 @@ export default function AppsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <AppsHeader />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-8">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         <div className="space-y-8">
           <div>

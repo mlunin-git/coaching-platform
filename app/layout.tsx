@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Coaching Platform",
+  title: "Safe Space - Coaching Platform",
   description: "Simple and secure coaching platform for managing clients and tasks",
 };
 
@@ -15,7 +17,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <LanguageProvider>{children}</LanguageProvider>
+        <LanguageProvider>
+          <div className="flex flex-col min-h-screen">
+            <Navigation />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </div>
+        </LanguageProvider>
       </body>
     </html>
   );

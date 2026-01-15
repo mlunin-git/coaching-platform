@@ -77,8 +77,6 @@ export function ParticipantManager({
         });
 
       if (insertError) {
-        console.error("Error inserting participant:", insertError);
-
         // Handle duplicate participant name error
         if (insertError.message?.includes("unique constraint") || insertError.message?.includes("duplicate")) {
           setError(t("planning.validation.participantExists"));
@@ -93,7 +91,6 @@ export function ParticipantManager({
       setLoading(false);
       onParticipantAdded();
     } catch (err) {
-      console.error("Error adding participant:", err);
       setError(t("planning.error.unknown"));
       setLoading(false);
     }

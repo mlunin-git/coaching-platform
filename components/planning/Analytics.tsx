@@ -3,7 +3,6 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { YearlyChart } from "./YearlyChart";
 import { CitiesMap } from "./CitiesMap";
-import { Statistics } from "./Statistics";
 
 interface Event {
   id: string;
@@ -82,14 +81,6 @@ export function Analytics({
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Statistics
-          eventsCount={currentYearEvents.length}
-          ideasCount={ideas.filter((i) => !i.description).length}
-          participantsCount={new Set(activeParticipants.map((p) => p.name)).size}
-        />
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">

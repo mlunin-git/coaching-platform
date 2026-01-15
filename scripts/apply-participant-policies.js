@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Apply RLS policies for planning module (coaches and participants)
+ * Apply participant RLS policies for planning module
  */
 
 const { Client } = require('pg');
@@ -14,12 +14,12 @@ const password = process.env.DB_PASSWORD;
 if (!password) {
   console.error('❌ Database password not provided');
   console.error('Set it with: export DB_PASSWORD="your_password"');
-  console.error('Then run: node scripts/apply-missing-policies.js');
+  console.error('Then run: node scripts/apply-participant-policies.js');
   process.exit(1);
 }
 
 async function main() {
-  console.log('🔐 Applying missing RLS policies...\n');
+  console.log('🔐 Applying participant RLS policies...\n');
 
   const client = new Client({
     host: 'db.aqcanwccrodchljmwsjf.supabase.co',
@@ -36,29 +36,19 @@ async function main() {
     await client.connect();
     console.log('✅ Connected!\n');
 
-    // Read migration files
-    const migration007Path = path.join(__dirname, '../supabase/migrations/007_add_missing_rls_policies.sql');
-    const migration008Path = path.join(__dirname, '../supabase/migrations/008_add_participant_rls_policies.sql');
-
-    let allSQL = '';
-
-    if (fs.existsSync(migration007Path)) {
-      allSQL += fs.readFileSync(migration007Path, 'utf-8') + '\n';
-    }
-
-    if (fs.existsSync(migration008Path)) {
-      allSQL += fs.readFileSync(migration008Path, 'utf-8') + '\n';
-    }
-
-    if (!allSQL.trim()) {
-      console.error('❌ No migration files found');
+    // Read migration file
+    const migrationPath = path.join(__dirname, '../supabase/migrations/008_add_participant_rls_policies.sql');
+    if (!fs.existsSync(migrationPath)) {
+      console.error('❌ Migration file not found:', migrationPath);
       process.exit(1);
     }
 
-    console.log('🚀 Executing RLS policies SQL...\n');
-    await client.query(allSQL);
+    const migrationSQL = fs.readFileSync(migrationPath, 'utf-8');
 
-    console.log('✅ RLS policies applied successfully!\n');
+    console.log('🚀 Executing RLS policies SQL...\n');
+    await client.query(migrationSQL);
+
+    console.log('✅ Participant RLS policies applied successfully!\n');
 
     // Verify policies
     console.log('📋 Checking created policies...');
@@ -82,11 +72,11 @@ async function main() {
       });
     }
 
-    console.log('\n🎉 All RLS policies have been applied!\n');
-    console.log('Now:');
-    console.log('  • Coaches can view and manage their planning groups');
-    console.log('  • Participants can add ideas, vote, and view events');
-    console.log('  • Everyone can interact with planning via shareable links\n');
+    console.log('\n🎉 Now participants can:');
+    console.log('  • Add ideas to planning groups');
+    console.log('  • Vote on ideas');
+    console.log('  • View events and calendar');
+    console.log('  • All via shareable links (no login required)\n');
 
   } catch (error) {
     console.error('\n❌ Error applying policies:');

@@ -49,9 +49,7 @@ export default function AdminPage() {
       .eq("coach_id", userData.id)
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching groups:", error);
-    } else {
+    if (!error) {
       setGroups(data || []);
     }
 
