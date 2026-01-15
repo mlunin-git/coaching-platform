@@ -257,6 +257,7 @@
     },
     "participant": {
       "selectName": "Select Your Name",
+      "you": "Your",
       "ideas": "Ideas",
       "events": "Events",
       "calendar": "Calendar",
@@ -267,6 +268,7 @@
       "createIdea": "Create Idea",
       "editIdea": "Edit Idea",
       "deleteIdea": "Delete Idea",
+      "your": "Your Idea",
       "title": "Title",
       "description": "Description",
       "suggestedDates": "Suggested Dates",
@@ -282,6 +284,7 @@
       "createEvent": "Create Event",
       "editEvent": "Edit Event",
       "deleteEvent": "Delete Event",
+      "noEvents": "No events yet. Create one to get started!",
       "startDate": "Start Date",
       "endDate": "End Date",
       "city": "City",
@@ -306,7 +309,8 @@
       "participantNameRequired": "Participant name is required",
       "participantExists": "This participant name already exists",
       "atLeastOneParticipant": "Add at least one participant",
-      "noParticipants": "No participants added yet"
+      "noParticipants": "No participants added yet",
+      "titleRequired": "Idea title is required"
     },
     "error": {
       "groupCreation": "Error creating group",
