@@ -161,13 +161,13 @@ export default function GroupPage() {
     sessionStorage.setItem(`planning_participant_${groupId}`, participantId);
   };
 
-  const handleDataRefresh = async () => {
+  const handleDataRefresh = useCallback(async () => {
     if (!actualGroupId) return;
     const ideasData = await getGroupIdeas(actualGroupId);
     const eventsData = await getGroupEvents(actualGroupId);
     setIdeas(ideasData);
     setEvents(eventsData);
-  };
+  }, [actualGroupId]);
 
   const handleEditEvent = useCallback((event: Event) => {
     setEditingEvent(event);
@@ -185,7 +185,7 @@ export default function GroupPage() {
     } catch (err) {
       console.error("Error archiving event:", err);
     }
-  }, []);
+  }, [handleDataRefresh]);
 
   const handleUnarchiveEvent = useCallback(async (eventId: string) => {
     const supabase = getSupabaseClient();
@@ -198,7 +198,7 @@ export default function GroupPage() {
     } catch (err) {
       console.error("Error unarchiving event:", err);
     }
-  }, []);
+  }, [handleDataRefresh]);
 
   const handleMarkAttending = useCallback(async (eventId: string) => {
     if (!selectedParticipantId) return;
@@ -233,7 +233,7 @@ export default function GroupPage() {
     } catch (err) {
       console.error("Error marking attendance:", err);
     }
-  }, [selectedParticipantId, attendingEventIds]);
+  }, [selectedParticipantId, attendingEventIds, handleDataRefresh]);
 
   const handleDemoteEvent = async (eventId: string) => {
     if (!confirm("Convert this event back to an idea? This will move it to the ideas list.")) {

@@ -132,11 +132,7 @@ export default function ClientDetailPage() {
     loadTasks();
   }, [clientId, loadClientInfo, loadTasks]);
 
-  const handleTaskStatusChange = useCallback((taskIndex: number) => {
-    toggleTaskStatus(taskIndex);
-  }, []);
-
-  async function toggleTaskStatus(taskIndex: number) {
+  const toggleTaskStatus = useCallback(async (taskIndex: number) => {
     const task = tasks[taskIndex];
     const newStatus = task.status === "pending" ? "completed" : "pending";
 
@@ -163,7 +159,7 @@ export default function ClientDetailPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update task");
     }
-  }
+  }, [tasks]);
 
   if (loading || !clientInfo) {
     return (
