@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase";
 import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
 import { sendMessage } from "@/lib/messaging";
+import { SkeletonLoader } from "@/components/SkeletonLoader";
 import type { Database } from "@/lib/database.types";
 
 type Client = Database["public"]["Tables"]["clients"]["Row"];
@@ -89,8 +90,9 @@ export default function CoachMessagesPage() {
 
   if (loadingClient || loading || !clientInfo) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="space-y-4">
+        <SkeletonLoader type="card" />
+        <SkeletonLoader type="list" count={3} />
       </div>
     );
   }
@@ -164,18 +166,31 @@ export default function CoachMessagesPage() {
             </div>
           )}
           <form onSubmit={handleSendMessage} className="flex gap-2">
-            <textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type your message..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
-              rows={2}
-              disabled={sending}
-            />
+            <div className="flex-1">
+              <textarea
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value.slice(0, 5000))}
+                placeholder="Type your message..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+                rows={2}
+                disabled={sending}
+                maxLength={5000}
+              />
+              <div className="mt-1 flex justify-between items-center">
+                <span className="text-xs text-gray-500">
+                  {newMessage.length}/5000 characters
+                </span>
+                {newMessage.length > 4500 && (
+                  <span className="text-xs text-orange-600 font-medium">
+                    Approaching limit
+                  </span>
+                )}
+              </div>
+            </div>
             <button
               type="submit"
               disabled={sending || !newMessage.trim()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-medium self-end"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-medium self-end h-fit"
             >
               {sending ? "Sending..." : "Send"}
             </button>

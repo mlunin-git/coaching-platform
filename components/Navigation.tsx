@@ -98,13 +98,16 @@ export function Navigation() {
           <button
             onClick={() => setMobileMenuOpen(true)}
             className="md:hidden p-2 text-gray-700 hover:text-indigo-600 transition-colors"
-            aria-label="Open menu"
+            aria-label="Open navigation menu"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
           >
             <svg
               className="w-6 h-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -122,25 +125,33 @@ export function Navigation() {
               <div
                 className="fixed inset-0 bg-black/50 z-40 md:hidden"
                 onClick={() => setMobileMenuOpen(false)}
+                aria-hidden="true"
               />
 
               {/* Slide-out Drawer */}
-              <div className="fixed top-0 right-0 bottom-0 w-80 max-w-[80vw] bg-white shadow-2xl z-50 md:hidden overflow-y-auto">
+              <div
+                id="mobile-menu"
+                className="fixed top-0 right-0 bottom-0 w-80 max-w-[80vw] bg-white shadow-2xl z-50 md:hidden overflow-y-auto"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="mobile-menu-title"
+              >
                 {/* Header with close button */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                  <span className="text-lg font-bold text-gray-900">
+                  <span id="mobile-menu-title" className="text-lg font-bold text-gray-900">
                     Safe Space
                   </span>
                   <button
                     onClick={() => setMobileMenuOpen(false)}
                     className="p-2 text-gray-700 hover:text-indigo-600 transition-colors"
-                    aria-label="Close menu"
+                    aria-label="Close navigation menu"
                   >
                     <svg
                       className="w-6 h-6"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
+                      aria-hidden="true"
                     >
                       <path
                         strokeLinecap="round"

@@ -3,6 +3,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase";
+import { SkeletonLoader } from "@/components/SkeletonLoader";
+import { TaskCard } from "../components/TaskCard";
+import { CreateTaskForm } from "../components/CreateTaskForm";
+import { ClientInfoCard } from "../components/ClientInfoCard";
 import type { Database } from "@/lib/database.types";
 
 type Client = Database["public"]["Tables"]["clients"]["Row"];
@@ -46,9 +50,6 @@ export default function ClientDetailPage() {
   const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
   const [tasks, setTasks] = useState<ClientTask[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newTaskTitle, setNewTaskTitle] = useState("");
-  const [newTaskDescription, setNewTaskDescription] = useState("");
-  const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
   const loadClientInfo = useCallback(async () => {
@@ -131,53 +132,9 @@ export default function ClientDetailPage() {
     loadTasks();
   }, [clientId, loadClientInfo, loadTasks]);
 
-  async function handleCreateTask(e: React.FormEvent) {
-    e.preventDefault();
-    setCreating(true);
-    setError("");
-
-    try {
-      const supabase = getSupabaseClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) throw new Error("Not authenticated");
-
-      // Create task for this coach
-      const { data: newTask, error: taskError } = await supabase
-        .from("tasks")
-        .insert({
-          coach_id: user.id,
-          title: newTaskTitle,
-          description: newTaskDescription,
-        })
-        .select()
-        .single();
-
-      if (taskError) throw taskError;
-      if (!newTask) throw new Error("Failed to create task");
-
-      // Create client_task for this specific client
-      const { error: clientTaskError } = await supabase
-        .from("client_tasks")
-        .insert({
-          client_id: clientId,
-          task_id: newTask.id,
-          status: "pending",
-        });
-
-      if (clientTaskError) throw clientTaskError;
-
-      setNewTaskTitle("");
-      setNewTaskDescription("");
-      loadTasks();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create task");
-    } finally {
-      setCreating(false);
-    }
-  }
+  const handleTaskStatusChange = useCallback((taskIndex: number) => {
+    toggleTaskStatus(taskIndex);
+  }, []);
 
   async function toggleTaskStatus(taskIndex: number) {
     const task = tasks[taskIndex];
@@ -210,8 +167,14 @@ export default function ClientDetailPage() {
 
   if (loading || !clientInfo) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="space-y-8">
+        <div className="flex gap-4">
+          <SkeletonLoader type="text" count={1} className="flex-1" />
+          <SkeletonLoader type="text" count={1} className="w-32" />
+        </div>
+        <SkeletonLoader type="card" />
+        <SkeletonLoader type="card" />
+        <SkeletonLoader type="list" count={2} />
       </div>
     );
   }
@@ -223,88 +186,29 @@ export default function ClientDetailPage() {
         <button
           onClick={() => router.back()}
           className="text-blue-600 hover:text-blue-700 font-medium"
+          aria-label="Back to clients list"
         >
           ← Back to Clients
         </button>
         <button
           onClick={() => router.push(`/coach/messages/${clientId}`)}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+          aria-label="Message client"
         >
           📨 Message Client
         </button>
       </div>
 
       {/* Client Info Card */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">{clientInfo.user.name}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <p className="text-sm text-gray-600">Email</p>
-            <p className="text-lg font-medium text-gray-900">
-              {clientInfo.user.email || "N/A"}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">Added on</p>
-            <p className="text-lg font-medium text-gray-900">
-              {new Date(clientInfo.client.created_at).toLocaleDateString()}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">Total Tasks</p>
-            <p className="text-lg font-medium text-gray-900">{tasks.length}</p>
-          </div>
-        </div>
-      </div>
+      <ClientInfoCard
+        client={clientInfo.client}
+        userName={clientInfo.user.name}
+        userEmail={clientInfo.user.email}
+        taskCount={tasks.length}
+      />
 
       {/* Create Task Form */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Create New Task</h3>
-        <form onSubmit={handleCreateTask} className="space-y-4">
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-              Task Title
-            </label>
-            <input
-              id="title"
-              type="text"
-              required
-              value={newTaskTitle}
-              onChange={(e) => setNewTaskTitle(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              placeholder="e.g., Complete the workbook"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <textarea
-              id="description"
-              value={newTaskDescription}
-              onChange={(e) => setNewTaskDescription(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              placeholder="Add details about the task..."
-              rows={4}
-            />
-          </div>
-
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={creating}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-medium"
-          >
-            {creating ? "Creating..." : "Create Task"}
-          </button>
-        </form>
-      </div>
+      <CreateTaskForm clientId={clientId} onTaskCreated={loadTasks} />
 
       {/* Tasks List */}
       <div className="space-y-3">
@@ -316,52 +220,11 @@ export default function ClientDetailPage() {
           </div>
         ) : (
           tasks.map((task, index) => (
-            <div
+            <TaskCard
               key={task.id}
-              className={`bg-white rounded-lg shadow p-6 transition-all ${
-                task.status === "completed" ? "bg-green-50 border-l-4 border-green-500" : ""
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                <button
-                  onClick={() => toggleTaskStatus(index)}
-                  className={`flex-shrink-0 w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
-                    task.status === "completed"
-                      ? "bg-green-500 border-green-500"
-                      : "border-gray-300 hover:border-gray-400"
-                  }`}
-                >
-                  {task.status === "completed" && (
-                    <span className="text-white text-sm">✓</span>
-                  )}
-                </button>
-
-                <div className="flex-1">
-                  <h4
-                    className={`font-semibold ${
-                      task.status === "completed"
-                        ? "text-gray-500 line-through"
-                        : "text-gray-900"
-                    }`}
-                  >
-                    {task.title}
-                  </h4>
-                  {task.description && (
-                    <p className="text-sm text-gray-600 mt-1">{task.description}</p>
-                  )}
-                  <div className="flex items-center gap-4 mt-3">
-                    <span className="text-xs text-gray-500">
-                      Created {new Date(task.created_at).toLocaleDateString()}
-                    </span>
-                    {task.completed_at && (
-                      <span className="text-xs text-green-600 font-medium">
-                        ✓ Completed {new Date(task.completed_at).toLocaleDateString()}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+              task={task}
+              onToggleStatus={() => toggleTaskStatus(index)}
+            />
           ))
         )}
       </div>
