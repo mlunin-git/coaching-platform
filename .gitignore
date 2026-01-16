@@ -37,10 +37,5 @@ next-env.d.ts
 _reviews/
 
 # 🔐 CONFIDENTIAL - Internal strategic documents (DO NOT COMMIT TO GIT)
-INTERNAL_*.md
-STRATEGY_*.md
-ROADMAP_*.md
-*_INTERNAL.md
-*_CONFIDENTIAL.md
-.internal/
-docs/internal/
+# Use _internal/ directory for all confidential/internal docs
+_internal/
