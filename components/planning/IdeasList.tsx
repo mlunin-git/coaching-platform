@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getSupabaseClient } from "@/lib/supabase";
 import { hasParticipantVoted } from "@/lib/planning";
@@ -49,9 +49,12 @@ export function IdeasList({
   const [editingIdea, setEditingIdea] = useState<Idea | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter out promoted ideas and sort by vote count
-  const activeIdeas = ideas.filter((idea) => !idea.promoted_to_event_id);
-  const sortedIdeas = [...activeIdeas].sort((a, b) => b.vote_count - a.vote_count);
+  // Filter out promoted ideas and sort by vote count (memoized for performance)
+  const sortedIdeas = useMemo(() => {
+    return ideas
+      .filter((idea) => !idea.promoted_to_event_id)
+      .sort((a, b) => b.vote_count - a.vote_count);
+  }, [ideas]);
 
   const handleVote = async (ideaId: string) => {
     if (!selectedParticipantId) return;

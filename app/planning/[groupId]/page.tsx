@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -169,12 +169,12 @@ export default function GroupPage() {
     setEvents(eventsData);
   };
 
-  const handleEditEvent = (event: Event) => {
+  const handleEditEvent = useCallback((event: Event) => {
     setEditingEvent(event);
     setShowEventForm(true);
-  };
+  }, []);
 
-  const handleArchiveEvent = async (eventId: string) => {
+  const handleArchiveEvent = useCallback(async (eventId: string) => {
     const supabase = getSupabaseClient();
     try {
       await supabase
@@ -185,9 +185,9 @@ export default function GroupPage() {
     } catch (err) {
       console.error("Error archiving event:", err);
     }
-  };
+  }, []);
 
-  const handleUnarchiveEvent = async (eventId: string) => {
+  const handleUnarchiveEvent = useCallback(async (eventId: string) => {
     const supabase = getSupabaseClient();
     try {
       await supabase
@@ -198,9 +198,9 @@ export default function GroupPage() {
     } catch (err) {
       console.error("Error unarchiving event:", err);
     }
-  };
+  }, []);
 
-  const handleMarkAttending = async (eventId: string) => {
+  const handleMarkAttending = useCallback(async (eventId: string) => {
     if (!selectedParticipantId) return;
 
     const supabase = getSupabaseClient();
@@ -233,7 +233,7 @@ export default function GroupPage() {
     } catch (err) {
       console.error("Error marking attendance:", err);
     }
-  };
+  }, [selectedParticipantId, attendingEventIds]);
 
   const handleDemoteEvent = async (eventId: string) => {
     if (!confirm("Convert this event back to an idea? This will move it to the ideas list.")) {
