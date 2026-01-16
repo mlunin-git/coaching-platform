@@ -432,7 +432,9 @@
     },
     "validation": {
       "groupNameRequired": "Gruppenname erforderlich",
+      "groupNameTooLong": "Gruppenname muss weniger als 255 Zeichen sein",
       "participantNameRequired": "Teilnehmernname erforderlich",
+      "participantNameTooLong": "Teilnehmernname muss weniger als 100 Zeichen sein",
       "participantExists": "Dieser Teilnehmernname existiert bereits",
       "atLeastOneParticipant": "Fügen Sie mindestens einen Teilnehmer hinzu",
       "noParticipants": "Noch keine Teilnehmer hinzugefügt",

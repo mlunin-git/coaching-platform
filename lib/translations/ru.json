@@ -298,7 +298,9 @@
     },
     "validation": {
       "groupNameRequired": "Название группы обязательно",
+      "groupNameTooLong": "Название группы должно содержать менее 255 символов",
       "participantNameRequired": "Имя участника обязательно",
+      "participantNameTooLong": "Имя участника должно содержать менее 100 символов",
       "participantExists": "Это имя участника уже существует",
       "atLeastOneParticipant": "Добавьте хотя бы одного участника",
       "noParticipants": "Участники ещё не добавлены",

@@ -432,7 +432,9 @@
     },
     "validation": {
       "groupNameRequired": "Назва групи обов'язкова",
+      "groupNameTooLong": "Назва групи повинна містити менше 255 символів",
       "participantNameRequired": "Ім'я учасника обов'язкове",
+      "participantNameTooLong": "Ім'я учасника повинно містити менше 100 символів",
       "participantExists": "Це ім'я учасника вже існує",
       "atLeastOneParticipant": "Додайте принаймні одного учасника",
       "noParticipants": "Учасники ще не додані",

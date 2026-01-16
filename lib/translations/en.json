@@ -307,7 +307,9 @@
     },
     "validation": {
       "groupNameRequired": "Group name is required",
+      "groupNameTooLong": "Group name must be less than 255 characters",
       "participantNameRequired": "Participant name is required",
+      "participantNameTooLong": "Participant name must be less than 100 characters",
       "participantExists": "This participant name already exists",
       "atLeastOneParticipant": "Add at least one participant",
       "noParticipants": "No participants added yet",
