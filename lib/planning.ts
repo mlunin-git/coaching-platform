@@ -1,4 +1,52 @@
 import { getSupabaseClient } from "@/lib/supabase";
+import type { Database } from "@/lib/database.types";
+
+// Type definitions for better type safety
+type PlanningGroup = Database["public"]["Tables"]["planning_groups"]["Row"];
+type Participant = Database["public"]["Tables"]["planning_participants"]["Row"];
+type Idea = Database["public"]["Tables"]["planning_ideas"]["Row"];
+type Event = Database["public"]["Tables"]["planning_events"]["Row"];
+
+interface IdeaWithVoteCount {
+  id: string;
+  title: string;
+  description?: string;
+  location?: string;
+  group_id: string;
+  participant_id: string;
+  promoted_to_event_id?: string;
+  created_at: string;
+  updated_at: string;
+  participant?: { name: string; color?: string };
+  promoted_event?: { id: string; title: string };
+  vote_count: number;
+}
+
+interface EventWithAttendeeCount {
+  id: string;
+  title: string;
+  description?: string;
+  start_date: string;
+  end_date?: string;
+  location?: string;
+  city?: string;
+  country?: string;
+  is_archived: boolean;
+  group_id: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+  creator?: { name: string; color?: string };
+  planning_event_participants?: Array<{ id: string }>;
+  attendee_count: number;
+}
+
+interface GroupAnalytics {
+  totalEvents: number;
+  totalIdeas: number;
+  monthlyData: Record<number, number>;
+  cities: Array<{ city: string | null; country: string | null; latitude: number; longitude: number }>;
+}
 
 /**
  * Generate a cryptographically secure access token for sharing planning groups
@@ -38,7 +86,7 @@ export async function validateAccessToken(token: string): Promise<boolean> {
 /**
  * Get a planning group by access token
  */
-export async function getGroupByToken(token: string) {
+export async function getGroupByToken(token: string): Promise<PlanningGroup> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
@@ -56,7 +104,7 @@ export async function getGroupByToken(token: string) {
 /**
  * Get all participants for a group
  */
-export async function getGroupParticipants(groupId: string) {
+export async function getGroupParticipants(groupId: string): Promise<Participant[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
@@ -75,7 +123,7 @@ export async function getGroupParticipants(groupId: string) {
  * @returns Array of ideas with vote counts
  * @throws Error if query fails
  */
-export async function getGroupIdeas(groupId: string) {
+export async function getGroupIdeas(groupId: string): Promise<IdeaWithVoteCount[]> {
   if (!groupId) {
     throw new Error('groupId is required');
   }
@@ -180,7 +228,7 @@ export async function hasParticipantVoted(
  * @returns Array of events with attendee counts
  * @throws Error if query fails
  */
-export async function getGroupEvents(groupId: string) {
+export async function getGroupEvents(groupId: string): Promise<EventWithAttendeeCount[]> {
   if (!groupId) {
     throw new Error('groupId is required');
   }
@@ -247,7 +295,7 @@ export async function getGroupEvents(groupId: string) {
 /**
  * Get non-archived events for a group
  */
-export async function getActiveGroupEvents(groupId: string) {
+export async function getActiveGroupEvents(groupId: string): Promise<Event[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
@@ -267,7 +315,7 @@ export async function getActiveGroupEvents(groupId: string) {
 /**
  * Get archived events for a group
  */
-export async function getArchivedGroupEvents(groupId: string) {
+export async function getArchivedGroupEvents(groupId: string): Promise<Event[]> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
@@ -287,7 +335,9 @@ export async function getArchivedGroupEvents(groupId: string) {
 /**
  * Get attendees for an event
  */
-export async function getEventAttendees(eventId: string) {
+export async function getEventAttendees(
+  eventId: string
+): Promise<Array<{ id: string; participant?: { id: string; name: string; color: string | null } }>> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
@@ -329,7 +379,7 @@ export async function isParticipantAttending(
 /**
  * Get analytics data for a group
  */
-export async function getGroupAnalytics(groupId: string) {
+export async function getGroupAnalytics(groupId: string): Promise<GroupAnalytics> {
   const supabase = getSupabaseClient();
 
   // Get total events
