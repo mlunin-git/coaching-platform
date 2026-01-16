@@ -15,6 +15,7 @@ import { ParticipantDropdown } from "@/components/planning/ParticipantDropdown";
 import { QuickStats } from "@/components/planning/QuickStats";
 import { IdeasList } from "@/components/planning/IdeasList";
 import { EventsList } from "@/components/planning/EventsList";
+import { EventForm } from "@/components/planning/EventForm";
 import { Analytics } from "@/components/planning/Analytics";
 
 interface Participant {
@@ -72,6 +73,9 @@ export default function GroupPage() {
   const [loading, setLoading] = useState(true);
   const [groupName, setGroupName] = useState("");
   const [actualGroupId, setActualGroupId] = useState<string | null>(null);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [attendingEventIds, setAttendingEventIds] = useState<Set<string>>(new Set());
 
   // Load saved participant selection
   useEffect(() => {
@@ -157,6 +161,112 @@ export default function GroupPage() {
     setEvents(eventsData);
   };
 
+  const handleEditEvent = (event: Event) => {
+    setEditingEvent(event);
+    setShowEventForm(true);
+  };
+
+  const handleArchiveEvent = async (eventId: string) => {
+    const supabase = getSupabaseClient();
+    try {
+      await supabase
+        .from("planning_events")
+        .update({ is_archived: true })
+        .eq("id", eventId);
+      handleDataRefresh();
+    } catch (err) {
+      console.error("Error archiving event:", err);
+    }
+  };
+
+  const handleUnarchiveEvent = async (eventId: string) => {
+    const supabase = getSupabaseClient();
+    try {
+      await supabase
+        .from("planning_events")
+        .update({ is_archived: false })
+        .eq("id", eventId);
+      handleDataRefresh();
+    } catch (err) {
+      console.error("Error unarchiving event:", err);
+    }
+  };
+
+  const handleMarkAttending = async (eventId: string) => {
+    if (!selectedParticipantId) return;
+
+    const supabase = getSupabaseClient();
+    const isAttending = attendingEventIds.has(eventId);
+
+    try {
+      if (isAttending) {
+        // Remove attendance
+        await supabase
+          .from("planning_event_participants")
+          .delete()
+          .eq("event_id", eventId)
+          .eq("participant_id", selectedParticipantId);
+
+        setAttendingEventIds((prev) => {
+          const next = new Set(prev);
+          next.delete(eventId);
+          return next;
+        });
+      } else {
+        // Add attendance
+        await supabase.from("planning_event_participants").insert({
+          event_id: eventId,
+          participant_id: selectedParticipantId,
+        });
+
+        setAttendingEventIds((prev) => new Set([...prev, eventId]));
+      }
+      handleDataRefresh();
+    } catch (err) {
+      console.error("Error marking attendance:", err);
+    }
+  };
+
+  const handleDemoteEvent = async (eventId: string) => {
+    if (!confirm("Convert this event back to an idea? This will move it to the ideas list.")) {
+      return;
+    }
+
+    if (!actualGroupId) return;
+
+    const supabase = getSupabaseClient();
+    try {
+      const eventToConvert = events.find((e) => e.id === eventId);
+      if (!eventToConvert) return;
+
+      // Create idea from event
+      const { data: newIdea, error: ideaError } = await supabase
+        .from("planning_ideas")
+        .insert({
+          group_id: actualGroupId,
+          participant_id: eventToConvert.created_by || selectedParticipantId,
+          title: eventToConvert.title,
+          description: eventToConvert.description || undefined,
+          location: eventToConvert.location || undefined,
+        } as any)
+        .select()
+        .single();
+
+      if (ideaError || !newIdea) {
+        console.error("Error creating idea:", ideaError);
+        return;
+      }
+
+      // Delete event
+      await supabase.from("planning_events").delete().eq("id", eventId);
+
+      handleDataRefresh();
+    } catch (err) {
+      console.error("Error demoting event:", err);
+      alert("Error converting event back to idea");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-8">
       <main className="container mx-auto px-4 pb-8 max-w-7xl">
@@ -228,7 +338,16 @@ export default function GroupPage() {
                       )}
                       {activeTab === "events" && (
                         <SectionErrorBoundary section="events list">
-                          <EventsList events={events} />
+                          <EventsList
+                            events={events}
+                            selectedParticipantId={selectedParticipantId}
+                            onEdit={handleEditEvent}
+                            onArchive={handleArchiveEvent}
+                            onUnarchive={handleUnarchiveEvent}
+                            onMarkAttending={handleMarkAttending}
+                            onDemote={handleDemoteEvent}
+                            attendingEventIds={attendingEventIds}
+                          />
                         </SectionErrorBoundary>
                       )}
                     </>
@@ -258,6 +377,31 @@ export default function GroupPage() {
                   onSelect={handleParticipantSelect}
                 />
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Event Editing Modal */}
+        {showEventForm && editingEvent && selectedParticipantId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                {t("planning.events.editEvent")}
+              </h2>
+              <EventForm
+                groupId={actualGroupId || groupId}
+                participantId={selectedParticipantId}
+                initialEvent={editingEvent}
+                onSuccess={() => {
+                  setShowEventForm(false);
+                  setEditingEvent(null);
+                  handleDataRefresh();
+                }}
+                onCancel={() => {
+                  setShowEventForm(false);
+                  setEditingEvent(null);
+                }}
+              />
             </div>
           </div>
         )}
