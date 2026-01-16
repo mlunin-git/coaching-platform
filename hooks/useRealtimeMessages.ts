@@ -6,14 +6,55 @@ import type { Database } from "@/lib/database.types";
 type Message = Database["public"]["Tables"]["messages"]["Row"];
 
 /**
- * Hook to manage real-time messaging between coaches and clients
- * Loads initial messages and subscribes to new message inserts
- * Automatically marks messages as read when viewed
- * Includes error recovery and retry logic
+ * Custom React hook for real-time messaging between coaches and clients
  *
- * @param clientId - The ID of the client for the conversation
- * @param currentUserType - The type of user making the query ("coach" or "client")
- * @returns Object with messages array, loading state, error, and refresh function
+ * Manages the complete messaging lifecycle: loads initial conversation history,
+ * subscribes to real-time message updates via Supabase, automatically marks messages as read,
+ * and handles connection errors with exponential backoff retry logic.
+ *
+ * Features:
+ * - Loads complete message history on mount
+ * - Real-time subscriptions to new messages via Supabase postgres_changes
+ * - Auto-marks incoming messages as read
+ * - Error recovery with exponential backoff (max 5 retries)
+ * - Prevents memory leaks with cleanup and isMounted checks
+ * - Validates clientId format as UUID before subscribing
+ *
+ * @param {string} clientId - The unique ID of the client for this conversation (UUID format)
+ * @param {string} currentUserType - The type/role of the current user ("coach" or "client")
+ *
+ * @returns {Object} Messaging state and utilities
+ * @returns {Message[]} messages - Array of Message objects in chronological order
+ * @returns {boolean} loading - Whether initial messages are being loaded
+ * @returns {string | null} error - Error message if subscription or initial load failed, null otherwise
+ * @returns {Function} refreshMessages - Function to manually reload messages from database
+ *
+ * @example
+ * // Coach viewing client conversation
+ * const { messages, loading, error, refreshMessages } = useRealtimeMessages(
+ *   clientId,
+ *   "coach"
+ * );
+ *
+ * if (loading) return <div>Loading messages...</div>;
+ * if (error) return <div className="text-red-500">{error}</div>;
+ *
+ * return (
+ *   <div className="space-y-4">
+ *     {messages.map(msg => (
+ *       <div key={msg.id} className={msg.sender_type === "coach" ? "text-blue-600" : "text-gray-700"}>
+ *         {msg.content}
+ *       </div>
+ *     ))}
+ *     <button onClick={refreshMessages}>Refresh messages</button>
+ *   </div>
+ * );
+ *
+ * @remarks
+ * - Errors take precedence: load errors override subscription errors in return value
+ * - Retry logic uses exponential backoff: 1s, 2s, 4s, 8s, 16s (max 30s)
+ * - Real-time sync automatically marks messages from other party as read
+ * - Empty clientId will skip subscription setup but still return loading state
  */
 export function useRealtimeMessages(
   clientId: string,

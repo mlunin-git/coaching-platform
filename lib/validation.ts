@@ -15,6 +15,11 @@ export interface ValidationResult {
 
 /**
  * Validate email format
+ * @param email - Email address to validate
+ * @returns true if email is valid (RFC 5322 simplified), false otherwise
+ * @example
+ * validateEmail('user@example.com') // true
+ * validateEmail('invalid-email') // false
  */
 export function validateEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,7 +27,14 @@ export function validateEmail(email: string): boolean {
 }
 
 /**
- * Validate name (required, 2-255 chars, no special chars)
+ * Validate person's name
+ * Requires 2-255 characters with alphanumeric, spaces, hyphens, and apostrophes
+ * @param name - Name to validate
+ * @returns true if name meets requirements, false otherwise
+ * @example
+ * validateName('John Doe') // true
+ * validateName('J') // false (too short)
+ * validateName('John@Doe') // false (special char not allowed)
  */
 export function validateName(name: string): boolean {
   if (!name || name.trim().length < 2) return false;
@@ -33,8 +45,12 @@ export function validateName(name: string): boolean {
 
 /**
  * Validate password strength
- * - At least 8 characters
- * - Mix of uppercase, lowercase, numbers
+ * Requires: 8-128 characters with uppercase, lowercase, and numbers
+ * @param password - Password to validate
+ * @returns true if password is strong enough, false otherwise
+ * @example
+ * validatePassword('SecurePass123') // true
+ * validatePassword('weakpass') // false (no uppercase/numbers)
  */
 export function validatePassword(password: string): boolean {
   if (!password || password.length < 8) return false;
@@ -47,7 +63,13 @@ export function validatePassword(password: string): boolean {
 }
 
 /**
- * Validate title/name field (for tasks, groups, etc)
+ * Validate title/name field for content (tasks, groups, events, etc)
+ * Requires 1-500 characters, not empty after trimming
+ * @param title - Title to validate
+ * @returns true if title is valid, false otherwise
+ * @example
+ * validateTitle('My Project') // true
+ * validateTitle('   ') // false (only whitespace)
  */
 export function validateTitle(title: string): boolean {
   if (!title || title.trim().length === 0) return false;
@@ -56,7 +78,13 @@ export function validateTitle(title: string): boolean {
 }
 
 /**
- * Validate description field
+ * Validate description field (optional)
+ * Maximum 5000 characters
+ * @param description - Description to validate or null/undefined for optional fields
+ * @returns true if valid (allows null/undefined and up to 5000 chars)
+ * @example
+ * validateDescription('Long description...') // true
+ * validateDescription(null) // true (optional)
  */
 export function validateDescription(description: string | null | undefined): boolean {
   if (!description) return true; // Optional
@@ -65,14 +93,28 @@ export function validateDescription(description: string | null | undefined): boo
 }
 
 /**
- * Validate that a value is not empty
+ * Validate that a string value is not empty
+ * Trims whitespace before checking
+ * @param value - String value to check (can be null/undefined)
+ * @returns true if value is non-empty string, false otherwise
+ * @example
+ * validateRequired('hello') // true
+ * validateRequired('   ') // false (whitespace only)
+ * validateRequired(null) // false
  */
 export function validateRequired(value: string | null | undefined): boolean {
   return value !== null && value !== undefined && value.trim().length > 0;
 }
 
 /**
- * Validate dates
+ * Validate date range for events/activities
+ * Checks that dates are valid and end date is not before start date
+ * @param startDate - Start date string or Date object
+ * @param endDate - Optional end date string or Date object
+ * @returns true if dates are valid, false if invalid or out of order
+ * @example
+ * validateDateRange('2025-01-16', '2025-01-20') // true
+ * validateDateRange('2025-01-20', '2025-01-16') // false (end before start)
  */
 export function validateDateRange(startDate: string, endDate?: string): boolean {
   try {
@@ -91,14 +133,26 @@ export function validateDateRange(startDate: string, endDate?: string): boolean 
 }
 
 /**
- * Validate color hex format
+ * Validate hex color code
+ * Accepts 6-digit hex colors with or without # prefix (requires #)
+ * @param color - Hex color string to validate (e.g., '#FF5733')
+ * @returns true if valid hex color, false otherwise
+ * @example
+ * validateColor('#FF5733') // true
+ * validateColor('FF5733') // false (missing #)
  */
 export function validateColor(color: string): boolean {
   return /^#[0-9A-F]{6}$/i.test(color);
 }
 
 /**
- * Validate location string
+ * Validate location name (optional)
+ * Maximum 255 characters, allows most characters
+ * @param location - Location string to validate or undefined for optional fields
+ * @returns true if valid or undefined, false if exceeds max length
+ * @example
+ * validateLocation('New York, USA') // true
+ * validateLocation(undefined) // true (optional)
  */
 export function validateLocation(location?: string): boolean {
   if (!location) return true; // Optional

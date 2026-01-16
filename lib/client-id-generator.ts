@@ -1,13 +1,31 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
 /**
- * Generates a unique client identifier for non-email clients.
- * Format: coach{4_chars}_client{3_digits}
- * Example: coach7a2x_client001
+ * Generates a unique, human-readable client identifier for clients without email addresses
  *
- * @param coachId - The UUID of the coach
- * @param supabaseClient - The Supabase client instance
- * @returns A unique client identifier string
+ * Creates sequential identifiers in format: `coach{4_chars}_client{3_digits}`
+ * Used when coaches want to share client links without requiring email addresses.
+ *
+ * Sequence:
+ * - Queries database for existing identifiers with same coach prefix
+ * - Increments sequence number and pads to 3 digits (001, 002, etc.)
+ * - Returns new unique identifier (e.g., coach7a2x_client001, coach7a2x_client002)
+ *
+ * @param {string} coachId - The UUID of the coach creating the client
+ * @param {SupabaseClient} supabaseClient - Supabase client instance for database queries
+ * @returns {Promise<string>} A unique client identifier string matching format `coach{4}_client{3_digits}`
+ * @throws {Error} If database query fails
+ *
+ * @example
+ * const supabase = getSupabaseClient();
+ * const clientId = await generateClientIdentifier(coachUUID, supabase);
+ * // Returns: "coach7a2x_client001"
+ *
+ * @remarks
+ * - Coach ID is shortened to first 4 characters for readability
+ * - Sequence numbers pad to 3 digits (001-999 clients per coach)
+ * - Uses database query to find highest existing sequence (O(log n) with ordering)
+ * - Suitable for QR codes and shareable links
  */
 export async function generateClientIdentifier(
   coachId: string,
@@ -44,9 +62,27 @@ export async function generateClientIdentifier(
 }
 
 /**
- * Validates a client identifier format
- * @param identifier - The client identifier to validate
- * @returns true if the identifier matches the expected format
+ * Validates whether a string matches the client identifier format
+ *
+ * Checks if the identifier conforms to the expected format:
+ * - Starts with "coach" followed by exactly 4 alphanumeric characters
+ * - Contains underscore separator
+ * - Ends with "client" followed by exactly 3 digits
+ *
+ * @param {string} identifier - The client identifier string to validate
+ * @returns {boolean} true if identifier matches format `coach[a-z0-9]{4}_client[0-9]{3}`, false otherwise
+ *
+ * @example
+ * isValidClientIdentifier('coach7a2x_client001')  // true
+ * isValidClientIdentifier('coach7a2x_client1')    // false (not 3 digits)
+ * isValidClientIdentifier('coach_client001')      // false (not 4 characters)
+ * isValidClientIdentifier('coachABCD_client001')  // false (has uppercase)
+ * isValidClientIdentifier('random-string')       // false
+ *
+ * @remarks
+ * - Case-sensitive: lowercase only (matches generateClientIdentifier output)
+ * - Used for client input validation and security checks
+ * - Regex: `/^coach[a-z0-9]{4}_client\d{3}$/`
  */
 export function isValidClientIdentifier(identifier: string): boolean {
   return /^coach[a-z0-9]{4}_client\d{3}$/.test(identifier);

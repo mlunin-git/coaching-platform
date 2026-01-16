@@ -3,13 +3,65 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { getUnreadCount } from "@/lib/messaging";
 
 /**
- * Hook to track unread message count for a user
- * Subscribes to real-time updates on the messages table
- * Uses filtered subscriptions to avoid N+1 query problem
+ * Custom React hook to track real-time unread message count for a user
  *
- * @param userId - The ID of the user (coach or client)
- * @param userRole - Whether the user is a "coach" or "client"
- * @returns Object with unreadCount, error state, and subscription status
+ * Provides real-time tracking of unread messages for coaches and clients with role-based filtering.
+ * Coaches see unread messages from all their clients, while clients see unread messages from their coach.
+ * Uses optimized, filtered subscriptions to avoid N+1 query problems.
+ *
+ * Features:
+ * - Loads initial unread count on mount
+ * - Real-time subscriptions to message changes (INSERT, UPDATE, DELETE)
+ * - Role-based filtering: coaches see all client messages, clients see coach messages only
+ * - Optimized subscriptions: only subscribes to relevant messages (no N+1 queries)
+ * - Handles subscription lifecycle with cleanup
+ * - Memory leak prevention with isMounted checks
+ *
+ * @param {string} userId - The unique ID of the user (coach or client, UUID format)
+ * @param {string} userRole - The role/type of the user ("coach" or "client")
+ *
+ * @returns {Object} Unread message tracking state
+ * @returns {number} unreadCount - Number of unread messages (0 if no unread messages)
+ * @returns {string | null} error - Error message if subscription or initial load failed, null if successful
+ * @returns {boolean} isSubscribed - Whether real-time subscription is currently active
+ *
+ * @example
+ * // Coach dashboard showing total unread count from all clients
+ * const { unreadCount, error, isSubscribed } = useUnreadMessages(coachId, "coach");
+ *
+ * return (
+ *   <div className="flex items-center gap-2">
+ *     <span>Messages</span>
+ *     {unreadCount > 0 && (
+ *       <span className="bg-red-500 text-white rounded-full px-2 py-1 text-sm">
+ *         {unreadCount}
+ *       </span>
+ *     )}
+ *     {error && <span className="text-red-600">{error}</span>}
+ *     {!isSubscribed && !error && (
+ *       <span className="text-gray-500 text-xs">(syncing...)</span>
+ *     )}
+ *   </div>
+ * );
+ *
+ * @example
+ * // Client viewing unread message count from coach
+ * const { unreadCount, error } = useUnreadMessages(clientUserId, "client");
+ *
+ * if (error) console.error("Failed to load unread count:", error);
+ *
+ * return (
+ *   <button>
+ *     Open messages {unreadCount > 0 && `(${unreadCount} new)`}
+ *   </button>
+ * );
+ *
+ * @remarks
+ * - For coaches: Retrieves all client IDs, then subscribes to messages from those clients only
+ * - For clients: Gets their client record ID, then subscribes to messages for that client only
+ * - Subscription filter format: coach uses IN clause, client uses EQ clause
+ * - Errors include both initial load failures and subscription setup failures
+ * - isSubscribed is true only when subscription channel status is SUBSCRIBED
  */
 export function useUnreadMessages(
   userId: string,
