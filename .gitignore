@@ -35,3 +35,12 @@ next-env.d.ts
 
 # code review and documentation (internal only)
 _reviews/
+
+# 🔐 CONFIDENTIAL - Internal strategic documents (DO NOT COMMIT TO GIT)
+INTERNAL_*.md
+STRATEGY_*.md
+ROADMAP_*.md
+*_INTERNAL.md
+*_CONFIDENTIAL.md
+.internal/
+docs/internal/
