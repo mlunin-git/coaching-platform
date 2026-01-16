@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import html2canvas from "html2canvas";
 import { WheelOfLife } from "@/components/apps/WheelOfLife";
 import { SectorEditor } from "@/components/apps/SectorEditor";
 import { EmotionMap } from "@/components/apps/EmotionMap";
@@ -142,6 +141,9 @@ export default function AppsPage() {
     if (!wheelContainerRef.current || sectors.length === 0) return;
 
     try {
+      // Dynamic import html2canvas only when needed (bundle optimization)
+      const html2canvas = (await import("html2canvas")).default;
+
       const canvas = await html2canvas(wheelContainerRef.current, {
         backgroundColor: "#ffffff",
         scale: 2,
