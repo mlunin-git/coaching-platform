@@ -58,12 +58,6 @@ export function Analytics({
   // Get current year
   const currentYear = new Date().getFullYear();
 
-  // Filter events for current year only (for chart)
-  const currentYearEvents = events.filter((event) => {
-    const eventYear = new Date(event.start_date).getFullYear();
-    return eventYear === currentYear;
-  });
-
   // Get unique cities from ALL events (not filtered by year, include active and archived)
   const cities = Array.from(
     new Map(
@@ -89,7 +83,7 @@ export function Analytics({
   });
 
   // Get active participants
-  const activeParticipants = currentYearEvents.map((e) => e.creator).filter((c) => c !== undefined);
+  const activeParticipants = events.map((e) => e.creator).filter((c) => c !== undefined);
 
   return (
     <div className="space-y-6">
@@ -103,13 +97,10 @@ export function Analytics({
         </div>
       </div>
 
-      {/* Events per Month Chart */}
+      {/* Events per Year Chart */}
       <div>
-        <h3 className="text-sm font-bold text-gray-900 mb-3">
-          📊 {t("planning.analytics.eventsPerMonth")}
-        </h3>
         <div className="bg-gray-50 rounded-lg p-4">
-          <YearlyChart events={currentYearEvents} year={currentYear} />
+          <YearlyChart events={events} year={currentYear} />
         </div>
       </div>
     </div>

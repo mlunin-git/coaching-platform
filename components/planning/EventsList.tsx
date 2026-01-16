@@ -64,9 +64,9 @@ export function EventsList({
         return (
           <div
             key={event.id}
-            className="bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 shadow-md hover:shadow-lg transition-shadow p-4"
+            className="bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 shadow-md hover:shadow-lg transition-shadow p-3 sm:p-4"
           >
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {/* Color indicator */}
               {event.creator?.color && (
                 <div
@@ -77,18 +77,18 @@ export function EventsList({
 
               {/* Content */}
               <div className="flex-1">
-                <div className="flex items-start gap-2 justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-2 sm:justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900">
                       {event.title}
                     </h3>
                     {event.description && (
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1">
                         {event.description}
                       </p>
                     )}
 
-                    <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-600">
+                    <div className="flex flex-wrap gap-2 sm:gap-4 mt-3 text-xs sm:text-sm text-gray-600">
                       <span>📅 {new Date(event.start_date).toLocaleDateString()}</span>
                       {event.end_date && (
                         <span>→ {new Date(event.end_date).toLocaleDateString()}</span>
@@ -105,11 +105,11 @@ export function EventsList({
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-col gap-2 items-end">
+                  <div className="flex flex-col sm:flex-row sm:flex-col gap-2 w-full sm:w-auto sm:items-end">
                     {selectedParticipantId && onMarkAttending && (
                       <button
                         onClick={() => onMarkAttending(event.id)}
-                        className={`px-3 py-1 rounded-lg transition-all font-medium text-sm ${
+                        className={`w-full sm:w-auto px-3 py-2 sm:py-1 rounded-lg transition-all font-medium text-sm ${
                           isAttending
                             ? "bg-indigo-600 text-white"
                             : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -119,7 +119,7 @@ export function EventsList({
                       </button>
                     )}
 
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 w-full sm:w-auto">
                       {onEdit && (
                         <button
                           onClick={() => onEdit(event)}

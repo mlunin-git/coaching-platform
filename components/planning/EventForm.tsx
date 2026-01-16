@@ -207,7 +207,7 @@ export function EventForm({
       </div>
 
       {/* Dates */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("planning.events.startDate")} *
@@ -247,7 +247,7 @@ export function EventForm({
       </div>
 
       {/* City & Country */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("planning.events.city")}
@@ -275,11 +275,11 @@ export function EventForm({
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3 pt-4">
+      <div className="flex flex-col sm:flex-row gap-3 pt-4">
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all font-medium disabled:opacity-50"
+          className="flex-1 w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all font-medium disabled:opacity-50"
         >
           {loading
             ? t("common.creating")
@@ -290,7 +290,7 @@ export function EventForm({
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 px-4 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition-all font-medium"
+          className="flex-1 w-full sm:w-auto px-4 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition-all font-medium"
         >
           {t("common.cancel")}
         </button>

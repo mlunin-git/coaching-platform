@@ -45,8 +45,8 @@ export function IdeaCard({
   const isPromoted = !!idea.promoted_to_event_id;
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 shadow-md hover:shadow-lg transition-shadow p-4">
-      <div className="flex gap-4">
+    <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 shadow-md hover:shadow-lg transition-shadow p-3 sm:p-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         {/* Color indicator */}
         {idea.participant?.color && (
           <div
@@ -57,8 +57,8 @@ export function IdeaCard({
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start gap-2">
-            <h3 className="text-lg font-bold text-gray-900 truncate flex-1">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate flex-1">
               {idea.title}
             </h3>
             {isPromoted && (
@@ -68,7 +68,7 @@ export function IdeaCard({
             )}
           </div>
           {idea.description && (
-            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+            <p className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2">
               {idea.description}
             </p>
           )}
@@ -83,12 +83,12 @@ export function IdeaCard({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 items-center flex-wrap justify-end">
+        <div className="flex gap-2 items-stretch sm:items-center flex-wrap justify-start sm:justify-end w-full sm:w-auto">
           {/* Vote button */}
           <button
             onClick={onVote}
             disabled={!selectedParticipantId}
-            className={`px-3 py-2 rounded-lg transition-all font-medium text-sm ${
+            className={`flex-1 sm:flex-initial px-3 py-2 rounded-lg transition-all font-medium text-sm ${
               hasVoted
                 ? "bg-indigo-600 text-white"
                 : selectedParticipantId

@@ -276,15 +276,16 @@ export default function GroupPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Content - Left Side (2 columns) */}
-            <div className="lg:col-span-2 space-y-4">
+            {/* Main Content - Left Side (2 columns on desktop, second on mobile) */}
+            <div className="lg:col-span-2 lg:order-1 space-y-4">
               {/* Header with Quick Stats */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
                 <h1 className="text-3xl font-bold text-gray-900 mb-6">
                   {t("planning.title")}
                 </h1>
                 <QuickStats
-                  eventsCount={events.filter((e) => !e.is_archived).length}
+                  plannedEvents={events.filter((e) => !e.is_archived).length}
+                  archivedEvents={events.filter((e) => e.is_archived).length}
                   ideasCount={ideas.filter((idea) => !idea.promoted_to_event_id).length}
                   participantsCount={participants.length}
                 />
@@ -296,7 +297,7 @@ export default function GroupPage() {
                 <div className="flex border-b border-gray-200">
                   <button
                     onClick={() => setActiveTab("ideas")}
-                    className={`flex-1 px-6 py-4 font-medium transition-colors ${
+                    className={`flex-1 px-3 py-3 sm:px-6 sm:py-4 font-medium text-sm sm:text-base transition-colors ${
                       activeTab === "ideas"
                         ? "text-indigo-600 border-b-2 border-indigo-600"
                         : "text-gray-600 hover:text-gray-900"
@@ -306,7 +307,7 @@ export default function GroupPage() {
                   </button>
                   <button
                     onClick={() => setActiveTab("events")}
-                    className={`flex-1 px-6 py-4 font-medium transition-colors ${
+                    className={`flex-1 px-3 py-3 sm:px-6 sm:py-4 font-medium text-sm sm:text-base transition-colors ${
                       activeTab === "events"
                         ? "text-indigo-600 border-b-2 border-indigo-600"
                         : "text-gray-600 hover:text-gray-900"
@@ -316,7 +317,7 @@ export default function GroupPage() {
                   </button>
                   <button
                     onClick={() => setActiveTab("archive")}
-                    className={`flex-1 px-6 py-4 font-medium transition-colors ${
+                    className={`flex-1 px-3 py-3 sm:px-6 sm:py-4 font-medium text-sm sm:text-base transition-colors ${
                       activeTab === "archive"
                         ? "text-indigo-600 border-b-2 border-indigo-600"
                         : "text-gray-600 hover:text-gray-900"
@@ -327,7 +328,7 @@ export default function GroupPage() {
                 </div>
 
                 {/* Tab Content */}
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   {activeTab === "ideas" && actualGroupId && (
                     <SectionErrorBoundary section="ideas list">
                       <IdeasList
@@ -370,10 +371,10 @@ export default function GroupPage() {
               </div>
             </div>
 
-            {/* Sidebar - Right Side (1 column) */}
-            <div className="lg:col-span-1 space-y-4">
+            {/* Sidebar - Right Side on desktop, first on mobile */}
+            <div className="lg:col-span-1 lg:order-2 space-y-4">
               {/* Participant Selector */}
-              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8">
+              <div className="bg-white rounded-xl shadow-lg p-4 lg:p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">
                   {t("planning.participant.selectName")}
                 </h3>
@@ -385,7 +386,7 @@ export default function GroupPage() {
               </div>
 
               {/* Analytics - Events per month, Cities Map, and Top Cities */}
-              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-96">
+              <div className="bg-white rounded-xl shadow-lg p-4 lg:p-6">
                 <SectionErrorBoundary section="analytics">
                   <Analytics
                     events={events}
@@ -400,8 +401,8 @@ export default function GroupPage() {
 
         {/* Event Editing Modal */}
         {showEventForm && editingEvent && selectedParticipantId && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 {t("planning.events.editEvent")}
               </h2>

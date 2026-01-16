@@ -175,18 +175,18 @@ export function IdeaForm({
         />
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all font-medium text-sm disabled:opacity-50"
+          className="flex-1 w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all font-medium text-sm disabled:opacity-50"
         >
           {loading ? t("common.creating") : isEditing ? t("common.save") : t("planning.ideas.createIdea")}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 px-4 py-2 bg-white text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-50 transition-all font-medium text-sm"
+          className="flex-1 w-full sm:w-auto px-4 py-2 bg-white text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-50 transition-all font-medium text-sm"
         >
           {t("common.cancel")}
         </button>
