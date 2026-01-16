@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Participant {
@@ -32,7 +33,7 @@ interface IdeaCardProps {
   onEdit?: () => void;
 }
 
-export function IdeaCard({
+export const IdeaCard = memo(function IdeaCard({
   idea,
   isOwner,
   hasVoted,
@@ -153,4 +154,4 @@ export function IdeaCard({
       </div>
     </div>
   );
-}
+});

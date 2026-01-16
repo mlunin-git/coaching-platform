@@ -11,15 +11,15 @@ import type { Database } from "@/lib/database.types";
 type Client = Database["public"]["Tables"]["clients"]["Row"];
 type User = Database["public"]["Tables"]["users"]["Row"];
 
-interface ClientWithUser extends Client {
+interface ClientWithUser {
+  id: string;
+  coach_id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
   email?: string | null;
   client_identifier?: string | null;
   has_auth_access?: boolean;
-  user?: Omit<User, "auth_user_id" | "name" | "role" | "created_at" | "updated_at"> & {
-    email?: string | null;
-    client_identifier?: string | null;
-    has_auth_access?: boolean;
-  };
 }
 
 export default function ClientsPage() {
@@ -102,11 +102,11 @@ export default function ClientsPage() {
       }
 
       // Flatten the data structure
-      const enrichedClients = (data || []).map((client: any) => ({
+      const enrichedClients: ClientWithUser[] = (data || []).map((client) => ({
         ...client,
-        email: client.user?.email,
-        client_identifier: client.user?.client_identifier,
-        has_auth_access: client.user?.has_auth_access,
+        email: client.user?.email || null,
+        client_identifier: client.user?.client_identifier || null,
+        has_auth_access: client.user?.has_auth_access || false,
       }));
 
       if (isMounted) {

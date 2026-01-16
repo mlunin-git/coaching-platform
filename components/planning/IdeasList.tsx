@@ -47,6 +47,7 @@ export function IdeasList({
   const [loading, setLoading] = useState(false);
   const [promoteModalIdea, setPromoteModalIdea] = useState<Idea | null>(null);
   const [editingIdea, setEditingIdea] = useState<Idea | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Filter out promoted ideas and sort by vote count
   const activeIdeas = ideas.filter((idea) => !idea.promoted_to_event_id);
@@ -56,6 +57,7 @@ export function IdeasList({
     if (!selectedParticipantId) return;
 
     setLoading(true);
+    setError(null);
     const supabase = getSupabaseClient();
 
     try {
@@ -64,11 +66,15 @@ export function IdeasList({
 
       if (hasVoted) {
         // Remove vote
-        await supabase
+        const { error: deleteError } = await supabase
           .from("planning_idea_votes")
           .delete()
           .eq("idea_id", ideaId)
           .eq("participant_id", selectedParticipantId);
+
+        if (deleteError) {
+          throw new Error(deleteError.message);
+        }
 
         setUserVotes((prev) => {
           const next = new Set(prev);
@@ -77,24 +83,45 @@ export function IdeasList({
         });
       } else {
         // Add vote
-        await supabase.from("planning_idea_votes").insert({
+        const { error: insertError } = await supabase.from("planning_idea_votes").insert({
           idea_id: ideaId,
           participant_id: selectedParticipantId,
         });
+
+        if (insertError) {
+          throw new Error(insertError.message);
+        }
 
         setUserVotes((prev) => new Set([...prev, ideaId]));
       }
 
       onDataRefresh();
-    } catch {
-      // Vote action failed - silently continue
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to update vote";
+      setError(errorMessage);
+      console.error("Error voting on idea:", err);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
     <div className="space-y-6">
+      {/* Error Message */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-800">
+            <strong>Error:</strong> {error}
+          </p>
+          <button
+            onClick={() => setError(null)}
+            className="mt-2 text-xs text-red-600 hover:text-red-800 font-medium"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Create or Edit Idea Form */}
       {!showForm && !editingIdea ? (
         <button

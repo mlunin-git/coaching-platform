@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getSupabaseClient } from "@/lib/supabase";
+import type { Language } from "@/lib/language";
 
 interface User {
   id: string;
@@ -140,7 +141,12 @@ export function Navigation() {
             {/* Language Selector */}
             <select
               value={language}
-              onChange={(e) => setLanguage(e.target.value as any)}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (["en", "de", "ru", "uk"].includes(value)) {
+                  setLanguage(value as Language);
+                }
+              }}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white hover:border-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all cursor-pointer"
             >
               <option value="en">🇬🇧 English</option>

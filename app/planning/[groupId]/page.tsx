@@ -80,10 +80,18 @@ export default function GroupPage() {
   // Load saved participant selection
   useEffect(() => {
     const saved = sessionStorage.getItem(`planning_participant_${groupId}`);
-    if (saved) {
-      setSelectedParticipantId(saved);
+    if (saved && participants.length > 0) {
+      // Validate that the saved participant still exists
+      const participantExists = participants.some(p => p.id === saved);
+      if (participantExists) {
+        setSelectedParticipantId(saved);
+      } else {
+        // Clear invalid saved participant
+        sessionStorage.removeItem(`planning_participant_${groupId}`);
+        setSelectedParticipantId(null);
+      }
     }
-  }, [groupId]);
+  }, [groupId, participants]);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -240,15 +248,23 @@ export default function GroupPage() {
       if (!eventToConvert) return;
 
       // Create idea from event
+      const participantId = eventToConvert.created_by || selectedParticipantId;
+      if (!participantId) {
+        console.error("Error: No participant ID available for idea creation");
+        return;
+      }
+
+      const ideaInsertData = {
+        group_id: actualGroupId,
+        participant_id: participantId,
+        title: eventToConvert.title,
+        description: eventToConvert.description || undefined,
+        location: eventToConvert.location || undefined,
+      };
+
       const { data: newIdea, error: ideaError } = await supabase
         .from("planning_ideas")
-        .insert({
-          group_id: actualGroupId,
-          participant_id: eventToConvert.created_by || selectedParticipantId,
-          title: eventToConvert.title,
-          description: eventToConvert.description || undefined,
-          location: eventToConvert.location || undefined,
-        } as any)
+        .insert(ideaInsertData)
         .select()
         .single();
 

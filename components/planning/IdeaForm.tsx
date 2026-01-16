@@ -88,8 +88,28 @@ export function IdeaForm({
       return;
     }
 
-    if (!title.trim()) {
+    const trimmedTitle = title.trim();
+    const trimmedDescription = description.trim();
+    const trimmedLocation = location.trim();
+
+    if (!trimmedTitle) {
       setError(t("planning.validation.titleRequired"));
+      return;
+    }
+
+    // Validate field lengths
+    if (trimmedTitle.length > 255) {
+      setError("Title must be less than 255 characters");
+      return;
+    }
+
+    if (trimmedDescription.length > 2000) {
+      setError("Description must be less than 2000 characters");
+      return;
+    }
+
+    if (trimmedLocation.length > 255) {
+      setError("Location must be less than 255 characters");
       return;
     }
 
@@ -103,9 +123,9 @@ export function IdeaForm({
         const { error: updateError } = await supabase
           .from("planning_ideas")
           .update({
-            title,
-            description,
-            location,
+            title: trimmedTitle,
+            description: trimmedDescription || null,
+            location: trimmedLocation || null,
             updated_at: new Date().toISOString(),
           })
           .eq("id", initialIdea.id);
@@ -122,9 +142,9 @@ export function IdeaForm({
           .insert({
             group_id: groupId,
             participant_id: participantId,
-            title,
-            description,
-            location,
+            title: trimmedTitle,
+            description: trimmedDescription || null,
+            location: trimmedLocation || null,
           });
 
         if (insertError) {
@@ -154,28 +174,34 @@ export function IdeaForm({
         <input
           type="text"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => setTitle(e.target.value.slice(0, 255))}
           placeholder={t("planning.ideas.title")}
+          maxLength={255}
+          required
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
         />
+        <p className="text-xs text-gray-500 mt-1">{title.length}/255 characters</p>
       </div>
 
       <div>
         <textarea
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
           placeholder={t("planning.ideas.description")}
+          maxLength={2000}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm resize-none"
           rows={3}
         />
+        <p className="text-xs text-gray-500 mt-1">{description.length}/2000 characters</p>
       </div>
 
       <div>
         <input
           type="text"
           value={location}
-          onChange={(e) => setLocation(e.target.value)}
+          onChange={(e) => setLocation(e.target.value.slice(0, 255))}
           placeholder={t("planning.ideas.location")}
+          maxLength={255}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
         />
       </div>
