@@ -6,7 +6,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 
 interface EventFormProps {
   groupId: string;
-  participantId: string;
+  participantId: string | null;
   initialEvent?: {
     id: string;
     title: string;
@@ -97,6 +97,11 @@ export function EventForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!participantId && !isEditing) {
+      setError(t("planning.validation.selectNameRequired") || "Please select your name");
+      return;
+    }
 
     if (!title.trim()) {
       setError(t("planning.validation.titleRequired"));

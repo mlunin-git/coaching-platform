@@ -11,7 +11,7 @@ interface PromoteIdeaModalProps {
   ideaDescription?: string;
   ideaLocation?: string;
   groupId: string;
-  participantId: string;
+  participantId: string | null;
   onSuccess: () => void;
   onClose: () => void;
 }

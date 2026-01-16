@@ -6,7 +6,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 
 interface IdeaFormProps {
   groupId: string;
-  participantId: string;
+  participantId: string | null;
   initialIdea?: {
     id: string;
     title: string;
@@ -82,6 +82,11 @@ export function IdeaForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!participantId) {
+      setError(t("planning.validation.selectNameRequired") || "Please select your name");
+      return;
+    }
 
     if (!title.trim()) {
       setError(t("planning.validation.titleRequired"));

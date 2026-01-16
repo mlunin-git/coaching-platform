@@ -31,7 +31,7 @@ interface Idea {
 interface IdeasListProps {
   ideas: Idea[];
   groupId: string;
-  selectedParticipantId: string;
+  selectedParticipantId: string | null;
   onDataRefresh: () => void;
 }
 
@@ -53,6 +53,8 @@ export function IdeasList({
   const sortedIdeas = [...activeIdeas].sort((a, b) => b.vote_count - a.vote_count);
 
   const handleVote = async (ideaId: string) => {
+    if (!selectedParticipantId) return;
+
     setLoading(true);
     const supabase = getSupabaseClient();
 
