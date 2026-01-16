@@ -48,8 +48,9 @@ export function IdeasList({
   const [promoteModalIdea, setPromoteModalIdea] = useState<Idea | null>(null);
   const [editingIdea, setEditingIdea] = useState<Idea | null>(null);
 
-  // Sort ideas by vote count
-  const sortedIdeas = [...ideas].sort((a, b) => b.vote_count - a.vote_count);
+  // Filter out promoted ideas and sort by vote count
+  const activeIdeas = ideas.filter((idea) => !idea.promoted_to_event_id);
+  const sortedIdeas = [...activeIdeas].sort((a, b) => b.vote_count - a.vote_count);
 
   const handleVote = async (ideaId: string) => {
     setLoading(true);
@@ -90,33 +91,9 @@ export function IdeasList({
     setLoading(false);
   };
 
-  const handleDeleteIdea = async (ideaId: string) => {
-    if (
-      !confirm(
-        t("planning.ideas.deleteIdea") + "? This cannot be undone."
-      )
-    ) {
-      return;
-    }
-
-    const supabase = getSupabaseClient();
-
-    try {
-      // Delete all votes for this idea first
-      await supabase.from("planning_idea_votes").delete().eq("idea_id", ideaId);
-
-      // Delete the idea
-      await supabase.from("planning_ideas").delete().eq("id", ideaId);
-
-      onDataRefresh();
-    } catch (err) {
-      alert("Error deleting idea");
-    }
-  };
-
   return (
     <div className="space-y-6">
-      {/* Create Idea Form */}
+      {/* Create or Edit Idea Form */}
       {!showForm && !editingIdea ? (
         <button
           onClick={() => setShowForm(true)}
@@ -133,6 +110,17 @@ export function IdeasList({
             onDataRefresh();
           }}
           onCancel={() => setShowForm(false)}
+        />
+      ) : editingIdea ? (
+        <IdeaForm
+          groupId={groupId}
+          participantId={selectedParticipantId}
+          initialIdea={editingIdea}
+          onSuccess={() => {
+            setEditingIdea(null);
+            onDataRefresh();
+          }}
+          onCancel={() => setEditingIdea(null)}
         />
       ) : null}
 
@@ -161,21 +149,36 @@ export function IdeasList({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           {sortedIdeas.map((idea) => {
             const isOwner = idea.participant_id === selectedParticipantId;
+            const isBeingEdited = editingIdea?.id === idea.id;
             return (
-              <IdeaCard
+              <div
                 key={idea.id}
-                idea={idea}
-                isOwner={isOwner}
-                hasVoted={userVotes.has(idea.id)}
-                selectedParticipantId={selectedParticipantId}
-                onVote={() => handleVote(idea.id)}
-                onPromote={isOwner ? () => setPromoteModalIdea(idea) : undefined}
-                onEdit={isOwner ? () => setEditingIdea(idea) : undefined}
-                onDelete={isOwner ? () => handleDeleteIdea(idea.id) : undefined}
-              />
+                className={`transition-all ${
+                  isBeingEdited
+                    ? "ring-2 ring-indigo-500 rounded-lg p-4 bg-indigo-50"
+                    : editingIdea
+                      ? "opacity-40 pointer-events-none"
+                      : ""
+                }`}
+              >
+                {isBeingEdited && (
+                  <div className="mb-4 p-2 bg-indigo-100 rounded text-indigo-700 text-sm font-medium">
+                    Editing: {idea.title}
+                  </div>
+                )}
+                <IdeaCard
+                  idea={idea}
+                  isOwner={isOwner}
+                  hasVoted={userVotes.has(idea.id)}
+                  selectedParticipantId={selectedParticipantId}
+                  onVote={() => handleVote(idea.id)}
+                  onPromote={isOwner && !editingIdea ? () => setPromoteModalIdea(idea) : undefined}
+                  onEdit={isOwner && !editingIdea ? () => setEditingIdea(idea) : undefined}
+                />
+              </div>
             );
           })}
         </div>

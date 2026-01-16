@@ -58,7 +58,7 @@ interface Event {
   attendee_count?: number;
 }
 
-type TabType = "ideas" | "events";
+type TabType = "ideas" | "events" | "archive";
 
 export default function GroupPage() {
   const { t } = useLanguage();
@@ -275,17 +275,17 @@ export default function GroupPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Main Content - Left Side (3 columns) */}
-            <div className="lg:col-span-3 space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Content - Left Side (2 columns) */}
+            <div className="lg:col-span-2 space-y-4">
               {/* Header with Quick Stats */}
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <h1 className="text-3xl font-bold text-gray-900 mb-6">
                   {t("planning.title")}
                 </h1>
                 <QuickStats
-                  eventsCount={events.length}
-                  ideasCount={ideas.length}
+                  eventsCount={events.filter((e) => !e.is_archived).length}
+                  ideasCount={ideas.filter((idea) => !idea.promoted_to_event_id).length}
                   participantsCount={participants.length}
                 />
               </div>
@@ -312,7 +312,17 @@ export default function GroupPage() {
                         : "text-gray-600 hover:text-gray-900"
                     }`}
                   >
-                    📅 {t("planning.participant.scheduledEvents")}
+                    📅 {t("planning.participant.events")}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("archive")}
+                    className={`flex-1 px-6 py-4 font-medium transition-colors ${
+                      activeTab === "archive"
+                        ? "text-indigo-600 border-b-2 border-indigo-600"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    📦 {t("planning.participant.archive")}
                   </button>
                 </div>
 
@@ -339,7 +349,21 @@ export default function GroupPage() {
                       {activeTab === "events" && (
                         <SectionErrorBoundary section="events list">
                           <EventsList
-                            events={events}
+                            events={events.filter((e) => !e.is_archived)}
+                            selectedParticipantId={selectedParticipantId}
+                            onEdit={handleEditEvent}
+                            onArchive={handleArchiveEvent}
+                            onUnarchive={handleUnarchiveEvent}
+                            onMarkAttending={handleMarkAttending}
+                            onDemote={handleDemoteEvent}
+                            attendingEventIds={attendingEventIds}
+                          />
+                        </SectionErrorBoundary>
+                      )}
+                      {activeTab === "archive" && (
+                        <SectionErrorBoundary section="archive list">
+                          <EventsList
+                            events={events.filter((e) => e.is_archived)}
                             selectedParticipantId={selectedParticipantId}
                             onEdit={handleEditEvent}
                             onArchive={handleArchiveEvent}
@@ -354,19 +378,11 @@ export default function GroupPage() {
                   )}
                 </div>
               </div>
-
-              {/* Analytics - Events per month and Cities Map */}
-              <SectionErrorBoundary section="analytics">
-                <Analytics
-                  events={events}
-                  ideas={ideas}
-                  participants={participants}
-                />
-              </SectionErrorBoundary>
             </div>
 
             {/* Sidebar - Right Side (1 column) */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-4">
+              {/* Participant Selector */}
               <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">
                   {t("planning.participant.selectName")}
@@ -376,6 +392,17 @@ export default function GroupPage() {
                   selected={selectedParticipantId}
                   onSelect={handleParticipantSelect}
                 />
+              </div>
+
+              {/* Analytics - Events per month, Cities Map, and Top Cities */}
+              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-96">
+                <SectionErrorBoundary section="analytics">
+                  <Analytics
+                    events={events}
+                    ideas={ideas}
+                    participants={participants}
+                  />
+                </SectionErrorBoundary>
               </div>
             </div>
           </div>

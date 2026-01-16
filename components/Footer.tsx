@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Footer() {
   const { t } = useLanguage();
   const currentYear = new Date().getFullYear();
+  const lastUpdated = format(new Date("2026-01-15"), "MMMM d, yyyy");
 
   return (
     <footer className="bg-white border-t border-gray-200 mt-12">
@@ -35,8 +37,8 @@ export function Footer() {
 
           <span className="hidden md:inline">•</span>
 
-          <span className="text-xs text-gray-500">
-            {t("footer.lastUpdated")}: 2026-01-15
+          <span className="text-sm text-gray-600">
+            {t("footer.lastUpdated")}: {lastUpdated}
           </span>
         </div>
       </div>

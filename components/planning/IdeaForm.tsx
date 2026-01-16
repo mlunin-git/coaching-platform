@@ -7,22 +7,77 @@ import { getSupabaseClient } from "@/lib/supabase";
 interface IdeaFormProps {
   groupId: string;
   participantId: string;
+  initialIdea?: {
+    id: string;
+    title: string;
+    description?: string;
+    location?: string;
+  };
   onSuccess: () => void;
   onCancel: () => void;
+  onDelete?: () => void;
 }
 
 export function IdeaForm({
   groupId,
   participantId,
+  initialIdea,
   onSuccess,
   onCancel,
+  onDelete,
 }: IdeaFormProps) {
   const { t } = useLanguage();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
+  const [title, setTitle] = useState(initialIdea?.title || "");
+  const [description, setDescription] = useState(initialIdea?.description || "");
+  const [location, setLocation] = useState(initialIdea?.location || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const isEditing = !!initialIdea;
+
+  const handleDelete = async () => {
+    if (!confirm(t("planning.ideas.deleteIdea") + "? This cannot be undone.")) {
+      return;
+    }
+
+    if (!initialIdea) return;
+
+    setLoading(true);
+    setError("");
+    const supabase = getSupabaseClient();
+
+    try {
+      // Delete all votes first
+      const { error: votesError } = await supabase
+        .from("planning_idea_votes")
+        .delete()
+        .eq("idea_id", initialIdea.id);
+
+      if (votesError && votesError.code !== "PGRST116") {
+        console.error("Error deleting votes:", votesError);
+      }
+
+      // Delete the idea
+      const { error: deleteError } = await supabase
+        .from("planning_ideas")
+        .delete()
+        .eq("id", initialIdea.id);
+
+      if (deleteError) {
+        console.error("Error deleting idea:", deleteError);
+        setError(`Error: ${deleteError.message}` || t("planning.error.unknown"));
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+      onSuccess();
+    } catch (err) {
+      console.error("Delete exception:", err);
+      setError(err instanceof Error ? err.message : t("planning.error.unknown"));
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,20 +93,40 @@ export function IdeaForm({
     try {
       const supabase = getSupabaseClient();
 
-      const { error: insertError } = await supabase
-        .from("planning_ideas")
-        .insert({
-          group_id: groupId,
-          participant_id: participantId,
-          title,
-          description,
-          location,
-        });
+      if (isEditing) {
+        // Update existing idea
+        const { error: updateError } = await supabase
+          .from("planning_ideas")
+          .update({
+            title,
+            description,
+            location,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", initialIdea.id);
 
-      if (insertError) {
-        setError(insertError.message || t("planning.error.unknown"));
-        setLoading(false);
-        return;
+        if (updateError) {
+          setError(updateError.message || t("planning.error.unknown"));
+          setLoading(false);
+          return;
+        }
+      } else {
+        // Create new idea
+        const { error: insertError } = await supabase
+          .from("planning_ideas")
+          .insert({
+            group_id: groupId,
+            participant_id: participantId,
+            title,
+            description,
+            location,
+          });
+
+        if (insertError) {
+          setError(insertError.message || t("planning.error.unknown"));
+          setLoading(false);
+          return;
+        }
       }
 
       setLoading(false);
@@ -106,7 +181,7 @@ export function IdeaForm({
           disabled={loading}
           className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all font-medium text-sm disabled:opacity-50"
         >
-          {loading ? t("common.creating") : t("planning.ideas.createIdea")}
+          {loading ? t("common.creating") : isEditing ? t("common.save") : t("planning.ideas.createIdea")}
         </button>
         <button
           type="button"
@@ -115,6 +190,16 @@ export function IdeaForm({
         >
           {t("common.cancel")}
         </button>
+        {isEditing && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={loading}
+            className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all font-medium text-sm disabled:opacity-50"
+          >
+            {t("planning.ideas.deleteIdea")}
+          </button>
+        )}
       </div>
     </form>
   );

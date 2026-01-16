@@ -53,6 +53,47 @@ export function EventForm({
 
   const isEditing = !!initialEvent;
 
+  const handleDelete = async () => {
+    if (
+      !confirm(
+        "Delete this event? This cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    if (!initialEvent) return;
+
+    setLoading(true);
+    const supabase = getSupabaseClient();
+
+    try {
+      // Delete event participants first
+      await supabase
+        .from("planning_event_participants")
+        .delete()
+        .eq("event_id", initialEvent.id);
+
+      // Delete the event
+      const { error: deleteError } = await supabase
+        .from("planning_events")
+        .delete()
+        .eq("id", initialEvent.id);
+
+      if (deleteError) {
+        setError(deleteError.message || t("planning.error.unknown"));
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+      onSuccess();
+    } catch (err) {
+      setError(t("planning.error.unknown"));
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -253,6 +294,16 @@ export function EventForm({
         >
           {t("common.cancel")}
         </button>
+        {isEditing && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={loading}
+            className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all font-medium disabled:opacity-50"
+          >
+            {t("planning.events.deleteEvent")}
+          </button>
+        )}
       </div>
     </form>
   );

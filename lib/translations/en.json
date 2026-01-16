@@ -261,6 +261,7 @@
       "ideas": "Ideas",
       "events": "Events",
       "scheduledEvents": "Scheduled Events",
+      "archive": "Archive",
       "calendar": "Calendar",
       "analytics": "Analytics",
       "viewOnly": "You can view content. Select your name to participate."
@@ -299,7 +300,7 @@
     },
     "analytics": {
       "yearlyChart": "Yearly Events",
-      "citiesMap": "Visited Cities",
+      "citiesMap": "Visited Locations",
       "totalEvents": "Total Events Planned",
       "totalIdeas": "Total Ideas",
       "mostActive": "Most Active Participant",

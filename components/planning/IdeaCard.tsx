@@ -30,7 +30,6 @@ interface IdeaCardProps {
   onVote: () => void;
   onPromote?: () => void;
   onEdit?: () => void;
-  onDelete?: () => void;
 }
 
 export function IdeaCard({
@@ -41,7 +40,6 @@ export function IdeaCard({
   onVote,
   onPromote,
   onEdit,
-  onDelete,
 }: IdeaCardProps) {
   const { t } = useLanguage();
   const isPromoted = !!idea.promoted_to_event_id;
@@ -85,7 +83,7 @@ export function IdeaCard({
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col gap-2 items-end">
+        <div className="flex gap-2 items-center flex-wrap justify-end">
           {/* Vote button */}
           <button
             onClick={onVote}
@@ -104,35 +102,26 @@ export function IdeaCard({
 
           {/* Owner actions */}
           {isOwner && (
-            <div className="flex gap-1">
-              {!isPromoted && onPromote && (
-                <button
-                  onClick={onPromote}
-                  className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors"
-                  title="Promote to event"
-                >
-                  📌
-                </button>
-              )}
+            <>
               {onEdit && (
                 <button
                   onClick={onEdit}
-                  className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                  className="px-2 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
                   title="Edit idea"
                 >
                   ✏️
                 </button>
               )}
-              {onDelete && (
+              {!isPromoted && onPromote && (
                 <button
-                  onClick={onDelete}
-                  className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
-                  title="Delete idea"
+                  onClick={onPromote}
+                  className="px-2 py-1 text-sm bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors"
+                  title="Promote to event"
                 >
-                  🗑️
+                  🚀
                 </button>
               )}
-            </div>
+            </>
           )}
 
           {/* Non-owner status */}

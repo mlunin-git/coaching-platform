@@ -386,6 +386,7 @@
       "ideas": "Ideen",
       "events": "Veranstaltungen",
       "scheduledEvents": "Geplante Veranstaltungen",
+      "archive": "Archiv",
       "calendar": "Kalender",
       "analytics": "Analytik",
       "viewOnly": "Sie können Inhalte anzeigen. Wählen Sie Ihren Namen, um teilzunehmen."
@@ -424,7 +425,7 @@
     },
     "analytics": {
       "yearlyChart": "Veranstaltungen pro Jahr",
-      "citiesMap": "Besuchte Städte",
+      "citiesMap": "Besuchte Orte",
       "totalEvents": "Veranstaltungen insgesamt",
       "totalIdeas": "Ideen insgesamt",
       "mostActive": "Aktivster Teilnehmer",
