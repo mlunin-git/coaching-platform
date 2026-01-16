@@ -291,6 +291,18 @@ export default function GroupPage() {
                 />
               </div>
 
+              {/* Participant Selector - Mobile Only */}
+              <div className="lg:hidden bg-white rounded-xl shadow-lg p-4 sm:p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                  {t("planning.participant.selectName")}
+                </h3>
+                <ParticipantDropdown
+                  participants={participants}
+                  selected={selectedParticipantId}
+                  onSelect={handleParticipantSelect}
+                />
+              </div>
+
               {/* Ideas and Events Tabs */}
               <div className="bg-white rounded-xl shadow-lg">
                 {/* Tab Navigation */}
@@ -373,8 +385,8 @@ export default function GroupPage() {
 
             {/* Sidebar - Right Side on desktop, first on mobile */}
             <div className="lg:col-span-1 lg:order-2 space-y-4">
-              {/* Participant Selector */}
-              <div className="bg-white rounded-xl shadow-lg p-4 lg:p-6">
+              {/* Participant Selector - Desktop Only */}
+              <div className="hidden lg:block bg-white rounded-xl shadow-lg p-4 lg:p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">
                   {t("planning.participant.selectName")}
                 </h3>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import html2canvas from "html2canvas";
 import { WheelOfLife } from "@/components/apps/WheelOfLife";
 import { SectorEditor } from "@/components/apps/SectorEditor";
 import { EmotionMap } from "@/components/apps/EmotionMap";
@@ -27,6 +28,7 @@ interface App {
 
 export default function AppsPage() {
   const { t } = useLanguage();
+  const wheelContainerRef = useRef<HTMLDivElement>(null);
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [editingSectorId, setEditingSectorId] = useState<string | null>(null);
@@ -134,6 +136,26 @@ export default function AppsPage() {
     }));
 
     setSectors(newSectors);
+  };
+
+  const handleDownloadWheel = async () => {
+    if (!wheelContainerRef.current || sectors.length === 0) return;
+
+    try {
+      const canvas = await html2canvas(wheelContainerRef.current, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+        logging: false,
+      });
+
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = `wheel-of-life-${new Date().toISOString().split("T")[0]}.png`;
+      link.click();
+    } catch (error) {
+      console.error("Error downloading wheel:", error);
+      alert("Failed to download wheel image");
+    }
   };
 
   // Update total level when sectors change
@@ -371,7 +393,7 @@ export default function AppsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Wheel Visualization */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl shadow-lg p-6">
+              <div ref={wheelContainerRef} className="bg-white rounded-xl shadow-lg p-6">
                 <style>{`
                   @keyframes spin {
                     from { transform: rotate(0deg); }
@@ -391,17 +413,27 @@ export default function AppsPage() {
 
                 {/* Statistics */}
                 {sectors.length > 0 && (
-                  <div className="mt-8 grid grid-cols-2 gap-4">
-                    <div className="bg-gray-50 rounded-lg p-4 text-center">
-                      <p className="text-sm text-gray-600">Average Satisfaction</p>
-                      <p className="text-3xl font-bold text-blue-600">{averageLevel}</p>
-                      <p className="text-xs text-gray-500">out of 10</p>
+                  <>
+                    <div className="mt-8 grid grid-cols-2 gap-4">
+                      <div className="bg-gray-50 rounded-lg p-4 text-center">
+                        <p className="text-sm text-gray-600">Average Satisfaction</p>
+                        <p className="text-3xl font-bold text-blue-600">{averageLevel}</p>
+                        <p className="text-xs text-gray-500">out of 10</p>
+                      </div>
+                      <div className="bg-gray-50 rounded-lg p-4 text-center">
+                        <p className="text-sm text-gray-600">Total Sectors</p>
+                        <p className="text-3xl font-bold text-blue-600">{sectors.length}</p>
+                      </div>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-4 text-center">
-                      <p className="text-sm text-gray-600">Total Sectors</p>
-                      <p className="text-3xl font-bold text-blue-600">{sectors.length}</p>
-                    </div>
-                  </div>
+
+                    {/* Download Button */}
+                    <button
+                      onClick={handleDownloadWheel}
+                      className="mt-6 w-full px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-700 hover:to-teal-700 font-medium transition-all duration-300 flex items-center justify-center gap-2"
+                    >
+                      ⬇️ Download Wheel
+                    </button>
+                  </>
                 )}
 
                 {sectors.length === 0 && (
@@ -414,6 +446,14 @@ export default function AppsPage() {
 
             {/* Control Panel */}
             <div className="space-y-4">
+              {/* Fill Defaults Button - Always Visible */}
+              <button
+                onClick={handleFillDefaults}
+                className="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-medium transition-all duration-300"
+              >
+                🎯 {t("apps.fillDefaults")}
+              </button>
+
               {/* Sectors List */}
               {sectors.length > 0 && (
                 <div className="bg-white rounded-xl shadow-lg p-6 space-y-4">
@@ -452,14 +492,6 @@ export default function AppsPage() {
                       </div>
                     ))}
                   </div>
-
-                  {/* Fill Defaults Button */}
-                  <button
-                    onClick={handleFillDefaults}
-                    className="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-medium transition-all duration-300"
-                  >
-                    🎯 {t("apps.fillDefaults")}
-                  </button>
                 </div>
               )}
 

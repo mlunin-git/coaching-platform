@@ -100,11 +100,58 @@ scripts/
 1. **Security First**: All data access must use RLS policies
 2. **Keep it Simple**: React hooks for state management
 3. **TypeScript Strict**: No `any` types (strict mode enforced)
+   - Accept nullable types (`string | null`) when optional parameters can be undefined
+   - Add null checks in functions before using potentially null values
 4. **Environment Variables**: Store sensitive keys in `.env.local` only
 5. **Password Security**: Always use `generateSecurePassword()` from `lib/password-generator.ts`
 6. **Token-Based Access**: Planning module uses secure tokens for public access
 7. **Internationalization**: All UI text must support 4 languages (EN, DE, RU, UK)
 8. **No Hardcoded Secrets**: Verify .env.local is in .gitignore before committing
+9. **Git Workflow**: Never push to production without explicit user approval
+10. **Build Verification**: Test build locally (`npm run build`) before pushing to catch TypeScript errors
+
+## Mobile Responsiveness
+
+**Breakpoint Strategy** (Tailwind defaults):
+- `sm:` (640px) - Small phones, fine-grained adjustments
+- `md:` (768px) - Primary mobile/tablet boundary
+- `lg:` (1024px) - Desktop and larger screens
+- `xl:` (1280px) - Large desktop
+
+**Responsive Component Patterns**:
+
+1. **Grids**: Use responsive grid-cols
+   - `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3` (stack mobile, 2 cols tablet, 3 cols desktop)
+   - Mobile: 1 column, Tablet+: multiple columns
+
+2. **Flexbox**: Use responsive flex-direction
+   - `flex flex-col sm:flex-row` (vertical on mobile, horizontal on sm+)
+
+3. **Spacing**: Use responsive padding/margins
+   - `p-3 sm:p-4 lg:p-6` (reduce padding on mobile)
+
+4. **Typography**: Scale text sizes
+   - `text-base sm:text-lg` (smaller on mobile)
+   - `text-xl sm:text-2xl` (scale up numbers/headings)
+
+5. **Buttons**: Full-width on mobile
+   - `w-full sm:w-auto` (full width on mobile, auto on sm+)
+
+6. **Avoid Sticky**: Don't use sticky positioning on mobile
+   - Desktop: `lg:sticky lg:top-8` only
+   - Mobile: Remove sticky for normal scrolling
+
+## Database Migrations
+
+**Important**: Migrations added to `supabase/migrations/` are tracked in git but must be **applied manually** to the database.
+
+**Workflow**:
+1. Create migration file in `supabase/migrations/`
+2. Commit and push to GitHub (migrations are NOT automatically applied by Vercel)
+3. **Manually apply** migration to Supabase database (via Supabase dashboard or CLI)
+4. Add note in commit message if migration is pending application
+
+**Example**: Migration `012_add_public_select_to_planning_groups.sql` was committed but needs manual application.
 
 ## Security Checklist
 
