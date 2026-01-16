@@ -328,53 +328,43 @@ export default function GroupPage() {
 
                 {/* Tab Content */}
                 <div className="p-6">
-                  {!selectedParticipantId ? (
-                    <div className="text-center py-12">
-                      <p className="text-gray-500">
-                        {t("planning.ideas.selectNameToParticipate")}
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      {activeTab === "ideas" && actualGroupId && (
-                        <SectionErrorBoundary section="ideas list">
-                          <IdeasList
-                            ideas={ideas}
-                            groupId={actualGroupId}
-                            selectedParticipantId={selectedParticipantId}
-                            onDataRefresh={handleDataRefresh}
-                          />
-                        </SectionErrorBoundary>
-                      )}
-                      {activeTab === "events" && (
-                        <SectionErrorBoundary section="events list">
-                          <EventsList
-                            events={events.filter((e) => !e.is_archived)}
-                            selectedParticipantId={selectedParticipantId}
-                            onEdit={handleEditEvent}
-                            onArchive={handleArchiveEvent}
-                            onUnarchive={handleUnarchiveEvent}
-                            onMarkAttending={handleMarkAttending}
-                            onDemote={handleDemoteEvent}
-                            attendingEventIds={attendingEventIds}
-                          />
-                        </SectionErrorBoundary>
-                      )}
-                      {activeTab === "archive" && (
-                        <SectionErrorBoundary section="archive list">
-                          <EventsList
-                            events={events.filter((e) => e.is_archived)}
-                            selectedParticipantId={selectedParticipantId}
-                            onEdit={handleEditEvent}
-                            onArchive={handleArchiveEvent}
-                            onUnarchive={handleUnarchiveEvent}
-                            onMarkAttending={handleMarkAttending}
-                            onDemote={handleDemoteEvent}
-                            attendingEventIds={attendingEventIds}
-                          />
-                        </SectionErrorBoundary>
-                      )}
-                    </>
+                  {activeTab === "ideas" && actualGroupId && (
+                    <SectionErrorBoundary section="ideas list">
+                      <IdeasList
+                        ideas={ideas}
+                        groupId={actualGroupId}
+                        selectedParticipantId={selectedParticipantId}
+                        onDataRefresh={handleDataRefresh}
+                      />
+                    </SectionErrorBoundary>
+                  )}
+                  {activeTab === "events" && (
+                    <SectionErrorBoundary section="events list">
+                      <EventsList
+                        events={events.filter((e) => !e.is_archived)}
+                        selectedParticipantId={selectedParticipantId}
+                        onEdit={handleEditEvent}
+                        onArchive={handleArchiveEvent}
+                        onUnarchive={handleUnarchiveEvent}
+                        onMarkAttending={handleMarkAttending}
+                        onDemote={handleDemoteEvent}
+                        attendingEventIds={attendingEventIds}
+                      />
+                    </SectionErrorBoundary>
+                  )}
+                  {activeTab === "archive" && (
+                    <SectionErrorBoundary section="archive list">
+                      <EventsList
+                        events={events.filter((e) => e.is_archived)}
+                        selectedParticipantId={selectedParticipantId}
+                        onEdit={handleEditEvent}
+                        onArchive={handleArchiveEvent}
+                        onUnarchive={handleUnarchiveEvent}
+                        onMarkAttending={handleMarkAttending}
+                        onDemote={handleDemoteEvent}
+                        attendingEventIds={attendingEventIds}
+                      />
+                    </SectionErrorBoundary>
                   )}
                 </div>
               </div>
