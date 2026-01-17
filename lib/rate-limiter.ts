@@ -208,6 +208,28 @@ export const passwordResetLimiter = createRateLimiter({
 });
 
 /**
+ * Normalize IPv6 addresses for consistent comparison
+ *
+ * @param ip - The IP address
+ * @returns Normalized IP address
+ *
+ * Converts IPv6 loopback variations to a standard form:
+ * - `::` → `::1` (IPv6 loopback)
+ * - `[::1]` → `::1` (IPv6 with brackets)
+ */
+function normalizeIPv6(ip: string): string {
+  // Remove brackets if present (some systems include them)
+  let normalized = ip.replace(/^\[/, "").replace(/\]$/, "");
+
+  // Normalize IPv6 loopback - convert :: to ::1 for consistency
+  if (normalized === "::") {
+    normalized = "::1";
+  }
+
+  return normalized;
+}
+
+/**
  * Get client IP address from request
  *
  * @param request - The request object
@@ -223,17 +245,17 @@ export function getClientIP(request: Request): string {
   const forwardedFor = request.headers.get("x-forwarded-for");
   if (forwardedFor) {
     // Take the first IP if multiple are present
-    return forwardedFor.split(",")[0].trim();
+    return normalizeIPv6(forwardedFor.split(",")[0].trim());
   }
 
   const realIP = request.headers.get("x-real-ip");
   if (realIP) {
-    return realIP;
+    return normalizeIPv6(realIP);
   }
 
   const cfIP = request.headers.get("cf-connecting-ip");
   if (cfIP) {
-    return cfIP;
+    return normalizeIPv6(cfIP);
   }
 
   // Fallback - shouldn't reach here in normal circumstances
