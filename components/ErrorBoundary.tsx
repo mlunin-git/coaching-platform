@@ -2,6 +2,7 @@
 
 import React, { ReactNode } from "react";
 import * as Sentry from "@sentry/nextjs";
+import { logger } from "@/lib/logger";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -40,7 +41,7 @@ export class ErrorBoundary extends React.Component<
       },
     });
 
-    console.error("Error caught by boundary:", error, errorInfo);
+    logger.error("Error caught by boundary:", { error, errorInfo });
   }
 
   render() {

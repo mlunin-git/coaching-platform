@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import { logger } from "@/lib/logger";
 
 /**
  * Error monitoring and reporting utilities
@@ -22,7 +23,7 @@ export function captureException(
     },
   });
 
-  console.error("Error captured:", errorObj, context);
+  logger.error("Error captured:", { errorObj, context });
 }
 
 /**
@@ -35,7 +36,7 @@ export function captureMessage(
   level: "fatal" | "error" | "warning" | "info" | "debug" = "error"
 ) {
   Sentry.captureMessage(message, level);
-  console.log(`[${level.toUpperCase()}] ${message}`);
+  logger.debug(`[${level.toUpperCase()}] ${message}`);
 }
 
 /**

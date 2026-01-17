@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getSupabaseClient } from "@/lib/supabase";
 import { useParticipantSelection } from "@/hooks/useParticipantSelection";
+import { logger } from "@/lib/logger";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import {
   getGroupParticipants,
@@ -130,7 +131,7 @@ export default function GroupPage() {
         if (isMounted) {
           const errorMessage = err instanceof Error ? err.message : "Failed to load planning group";
           setError(errorMessage);
-          console.error("Error fetching planning group:", err);
+          logger.error("Error fetching planning group:", err);
         }
       } finally {
         if (isMounted) {
@@ -179,7 +180,7 @@ export default function GroupPage() {
         .eq("id", eventId);
       handleDataRefresh();
     } catch (err) {
-      console.error("Error archiving event:", err);
+      logger.error("Error archiving event:", err);
     }
   }, [handleDataRefresh]);
 
@@ -192,7 +193,7 @@ export default function GroupPage() {
         .eq("id", eventId);
       handleDataRefresh();
     } catch (err) {
-      console.error("Error unarchiving event:", err);
+      logger.error("Error unarchiving event:", err);
     }
   }, [handleDataRefresh]);
 
@@ -227,7 +228,7 @@ export default function GroupPage() {
       }
       handleDataRefresh();
     } catch (err) {
-      console.error("Error marking attendance:", err);
+      logger.error("Error marking attendance:", err);
     }
   }, [selectedParticipantId, attendingEventIds, handleDataRefresh]);
 
@@ -246,7 +247,7 @@ export default function GroupPage() {
       // Create idea from event
       const participantId = eventToConvert.created_by || selectedParticipantId;
       if (!participantId) {
-        console.error("Error: No participant ID available for idea creation");
+        logger.error("Error: No participant ID available for idea creation");
         return;
       }
 
@@ -265,7 +266,7 @@ export default function GroupPage() {
         .single();
 
       if (ideaError || !newIdea) {
-        console.error("Error creating idea:", ideaError);
+        logger.error("Error creating idea:", ideaError);
         return;
       }
 
@@ -274,7 +275,7 @@ export default function GroupPage() {
 
       handleDataRefresh();
     } catch (err) {
-      console.error("Error demoting event:", err);
+      logger.error("Error demoting event:", err);
       alert("Error converting event back to idea");
     }
   };

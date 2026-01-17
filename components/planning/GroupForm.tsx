@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getSupabaseClient } from "@/lib/supabase";
 import { generateAccessToken } from "@/lib/planning";
+import { logger } from "@/lib/logger";
 
 interface GroupFormProps {
   onSuccess: () => void;
@@ -135,7 +136,7 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
         .single();
 
       if (groupError || !groupData) {
-        console.error("Group creation error:", groupError);
+        logger.error("Group creation error:", groupError);
         setError(t("planning.error.groupCreation"));
         setLoading(false);
         return;
@@ -153,7 +154,7 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
         .insert(participantInserts);
 
       if (participantError) {
-        console.error("Participant creation error:", participantError);
+        logger.error("Participant creation error:", participantError);
         setError(t("planning.error.participantCreation"));
         setLoading(false);
         return;
@@ -162,7 +163,7 @@ export function GroupForm({ onSuccess, onCancel }: GroupFormProps) {
       setLoading(false);
       onSuccess();
     } catch (err) {
-      console.error("Group form error:", err);
+      logger.error("Group form error:", err);
       setError(t("planning.error.unknown"));
       setLoading(false);
     }

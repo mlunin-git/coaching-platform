@@ -7,6 +7,7 @@ import { hasParticipantVoted } from "@/lib/planning";
 import { IdeaCard } from "./IdeaCard";
 import { IdeaForm } from "./IdeaForm";
 import { PromoteIdeaModal } from "./PromoteIdeaModal";
+import { logger } from "@/lib/logger";
 
 interface Participant {
   name: string;
@@ -102,7 +103,7 @@ export function IdeasList({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to update vote";
       setError(errorMessage);
-      console.error("Error voting on idea:", err);
+      logger.error("Error voting on idea:", err);
     } finally {
       setLoading(false);
     }

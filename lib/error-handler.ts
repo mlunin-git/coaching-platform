@@ -4,6 +4,7 @@
  */
 
 import * as Sentry from '@sentry/nextjs';
+import { logger } from "@/lib/logger";
 
 /**
  * Standard error response structure
@@ -456,7 +457,7 @@ export function handleError(
 
   // Log error
   if (logToConsole) {
-    console.error('[ERROR]', errorResponse);
+    logger.error('[ERROR]', errorResponse);
   }
 
   // Send to Sentry

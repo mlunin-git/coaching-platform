@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase";
+import { logger } from "@/lib/logger";
 
 export default function Home() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function Home() {
 
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) {
-        console.error("Session error:", sessionError);
+        logger.error("Session error:", sessionError);
         router.push("/apps");
         setLoading(false);
         return;
@@ -29,7 +30,7 @@ export default function Home() {
           .single();
 
         if (error) {
-          console.error("User lookup error:", error);
+          logger.error("User lookup error:", error);
           router.push("/apps");
         } else if (data?.role === "coach") {
           router.push("/coach/clients");

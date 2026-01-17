@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase";
+import { logger } from "@/lib/logger";
 import type { Database } from "@/lib/database.types";
 
 type User = Database["public"]["Tables"]["users"]["Row"];
@@ -33,7 +34,7 @@ export default function AdminLayout({
         .then(({ data, error }) => {
           const userData = data as User | null;
           if (error || !userData || userData.role !== "coach") {
-            console.error("Planning admin auth error:", error);
+            logger.error("Planning admin auth error", error);
             router.push("/auth/login");
           } else {
             setUser(userData);

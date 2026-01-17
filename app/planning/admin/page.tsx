@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getSupabaseClient } from "@/lib/supabase";
+import { logger } from "@/lib/logger";
 import { GroupForm } from "@/components/planning/GroupForm";
 import { GroupList } from "@/components/planning/GroupList";
 
@@ -31,7 +32,7 @@ export default function AdminPage() {
       } = await supabase.auth.getSession();
 
       if (sessionError) {
-        console.error("Session error:", sessionError);
+        logger.error("Session error:", sessionError);
         setLoading(false);
         return;
       }
@@ -49,7 +50,7 @@ export default function AdminPage() {
         .single();
 
       if (userError || !userData) {
-        console.error("User lookup error:", userError);
+        logger.error("User lookup error:", userError);
         setLoading(false);
         return;
       }
@@ -62,12 +63,12 @@ export default function AdminPage() {
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("Groups fetch error:", error);
+        logger.error("Groups fetch error:", error);
       } else {
         setGroups(data || []);
       }
     } catch (err) {
-      console.error("Planning admin error:", err);
+      logger.error("Planning admin error:", err);
     } finally {
       setLoading(false);
     }

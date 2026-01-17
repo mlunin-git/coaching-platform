@@ -1,5 +1,6 @@
 import { getSupabaseClient } from "./supabase";
 import type { Database } from "./database.types";
+import { logger } from "@/lib/logger";
 
 type Message = Database["public"]["Tables"]["messages"]["Row"];
 
@@ -181,7 +182,7 @@ export async function getUnreadCount(
         
 
       if (clientsError) {
-        console.error('Failed to fetch coach clients:', clientsError);
+        logger.error('Failed to fetch coach clients:', clientsError);
         throw new Error(`Failed to fetch clients: ${clientsError.message}`);
       }
 
@@ -197,7 +198,7 @@ export async function getUnreadCount(
         
 
       if (error) {
-        console.error('Failed to count unread messages:', error);
+        logger.error('Failed to count unread messages:', error);
         throw new Error(`Failed to count messages: ${error.message}`);
       }
 
@@ -213,7 +214,7 @@ export async function getUnreadCount(
 
       if (clientError) {
         // Client record not found is not a critical error
-        console.warn('Client record not found for user:', userId);
+        logger.warn('Client record not found for user:', userId);
         return 0;
       }
 
@@ -230,14 +231,14 @@ export async function getUnreadCount(
         
 
       if (error) {
-        console.error('Failed to count client unread messages:', error);
+        logger.error('Failed to count client unread messages:', error);
         throw new Error(`Failed to count messages: ${error.message}`);
       }
 
       return count ?? 0;
     }
   } catch (error) {
-    console.error('Error getting unread count:', error);
+    logger.error('Error getting unread count:', error);
     if (error instanceof Error) {
       throw error;
     }
@@ -268,7 +269,7 @@ export async function getUnreadCountsByClient(
       
 
     if (clientsError) {
-      console.error('Failed to fetch coach clients for unread counts:', clientsError);
+      logger.error('Failed to fetch coach clients for unread counts:', clientsError);
       throw new Error(`Failed to fetch clients: ${clientsError.message}`);
     }
 
@@ -285,7 +286,7 @@ export async function getUnreadCountsByClient(
       
 
     if (error) {
-      console.error('Failed to fetch unread messages:', error);
+      logger.error('Failed to fetch unread messages:', error);
       throw new Error(`Failed to fetch messages: ${error.message}`);
     }
 
@@ -297,7 +298,7 @@ export async function getUnreadCountsByClient(
 
     return counts;
   } catch (error) {
-    console.error('Error getting unread counts by client:', error);
+    logger.error('Error getting unread counts by client:', error);
     if (error instanceof Error) {
       throw error;
     }

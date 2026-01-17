@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/contexts/LanguageContext";
+import { logger } from "@/lib/logger";
 
 interface Participant {
   id: string;
@@ -27,7 +28,7 @@ export function ParticipantDropdown({
     // Handle both sync and async callbacks without blocking
     if (result instanceof Promise) {
       result.catch((error) => {
-        console.error("Error selecting participant:", error);
+        logger.error("Error selecting participant:", error);
       });
     }
   };

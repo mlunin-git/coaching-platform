@@ -11,6 +11,7 @@ import { SecondaryGainsAnalyzer } from "@/components/apps/SecondaryGainsAnalyzer
 import { LimitingBeliefsIdentifier } from "@/components/apps/LimitingBeliefsIdentifier";
 import { EcologicalAssessmentChecklist } from "@/components/apps/EcologicalAssessmentChecklist";
 import { LogicalLevelsFramework } from "@/components/apps/LogicalLevelsFramework";
+import { logger } from "@/lib/logger";
 
 interface Sector {
   id: string;
@@ -143,7 +144,6 @@ export default function AppsPage() {
     try {
       // Dynamic import html2canvas only when needed (bundle optimization)
       const html2canvas = (await import("html2canvas")).default;
-
       const canvas = await html2canvas(wheelContainerRef.current, {
         backgroundColor: "#ffffff",
         scale: 2,
@@ -155,7 +155,7 @@ export default function AppsPage() {
       link.download = `wheel-of-life-${new Date().toISOString().split("T")[0]}.png`;
       link.click();
     } catch (error) {
-      console.error("Error downloading wheel:", error);
+      logger.error("Error downloading wheel:", error);
       alert("Failed to download wheel image");
     }
   };

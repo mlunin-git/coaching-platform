@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import type { Database } from "@/lib/database.types";
+import { logger } from "@/lib/logger";
 
 type User = Database["public"]["Tables"]["users"]["Row"];
 
@@ -56,7 +57,7 @@ export default function CoachLayout({
         .then(({ data, error }) => {
           const userData = data as User | null;
           if (error || !userData || userData.role !== "coach") {
-            console.error("Coach layout auth error:", error);
+            logger.error("Coach layout auth error:", error);
             router.push("/auth/login");
           } else {
             setUser(userData);

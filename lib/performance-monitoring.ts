@@ -4,6 +4,7 @@
  */
 
 import * as Sentry from '@sentry/nextjs';
+import { logger } from "@/lib/logger";
 
 /**
  * Performance metric data structure
@@ -74,7 +75,7 @@ export function startTimer(operationName: string): () => number {
 export function recordMetric(metric: PerformanceMetric): void {
   // Log to console in development
   if (process.env.NODE_ENV === 'development') {
-    console.log(`[METRIC] ${metric.name}: ${metric.value}${metric.unit}`, metric.tags || {});
+    logger.debug(`[METRIC] ${metric.name}: ${metric.value}${metric.unit}`, metric.tags || {});
   }
 
   // Send to Sentry

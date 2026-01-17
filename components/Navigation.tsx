@@ -6,6 +6,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { NavigationMenuItems } from "./NavigationMenuItems";
 import { LanguageSelector } from "./LanguageSelector";
 import { NavigationUserSection } from "./NavigationUserSection";
+import { logger } from "@/lib/logger";
 
 interface User {
   id: string;
@@ -44,7 +45,7 @@ export function Navigation() {
           }
         }
       } catch (error) {
-        console.error("Error checking user:", error);
+        logger.error("Error checking user:", error);
       } finally {
         setLoading(false);
       }

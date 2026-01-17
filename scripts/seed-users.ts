@@ -19,26 +19,27 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { generateSecurePassword } from "../lib/password-generator";
+import { logger } from "@/lib/logger";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error(
+  logger.error(
     "❌ Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY"
   );
   process.exit(1);
 }
 
 if (!SUPABASE_SERVICE_KEY) {
-  console.error("❌ Missing SUPABASE_SERVICE_KEY");
-  console.log("\nTo get the service key:");
-  console.log(
+  logger.error("❌ Missing SUPABASE_SERVICE_KEY");
+  logger.info("\nTo get the service key:");
+  logger.info(
     "1. Go to Supabase Dashboard > Project Settings > API"
   );
-  console.log("2. Copy the 'service_role' key");
-  console.log("3. Add to .env.local: SUPABASE_SERVICE_KEY=<your-key>\n");
+  logger.info("2. Copy the 'service_role' key");
+  logger.info("3. Add to .env.local: SUPABASE_SERVICE_KEY=<your-key>\n");
   process.exit(1);
 }
 
@@ -54,8 +55,8 @@ interface SeedUser {
 }
 
 async function seedUsers() {
-  console.log("🌱 Seeding default users...\n");
-  console.log("⚠️  Generating secure passwords for demo accounts...\n");
+  logger.info("🌱 Seeding default users...\n");
+  logger.info("⚠️  Generating secure passwords for demo accounts...\n");
 
   const users: SeedUser[] = [
     {
@@ -84,7 +85,7 @@ async function seedUsers() {
         role: user.role,
       });
 
-      console.log(`📧 Creating ${user.role}: ${user.email}...`);
+      logger.info(`📧 Creating ${user.role}: ${user.email}...`);
 
       // Create Auth user with secure password
       const { data, error } = await supabaseAdmin.auth.admin.createUser({
@@ -94,19 +95,19 @@ async function seedUsers() {
       });
 
       if (error) {
-        console.error(
+        logger.error(
           `   ❌ Error creating auth user: ${error.message}`
         );
         continue;
       }
 
       if (!data.user) {
-        console.error(`   ❌ Failed to create auth user`);
+        logger.error(`   ❌ Failed to create auth user`);
         continue;
       }
 
       const authUserId = data.user.id;
-      console.log(`   ✅ Auth user created: ${authUserId}`);
+      logger.info(`   ✅ Auth user created: ${authUserId}`);
 
       // Update user profile with auth_user_id
       const { error: updateError } = await supabaseClient
@@ -115,40 +116,40 @@ async function seedUsers() {
         .eq("id", user.userId);
 
       if (updateError) {
-        console.error(`   ❌ Error updating profile: ${updateError.message}`);
+        logger.error(`   ❌ Error updating profile: ${updateError.message}`);
         continue;
       }
 
-      console.log(`   ✅ Profile updated\n`);
+      logger.info(`   ✅ Profile updated\n`);
     } catch (error) {
-      console.error(`   ❌ Unexpected error:`, error);
+      logger.error(`   ❌ Unexpected error:`, error);
     }
   }
 
-  console.log("✨ Seeding complete!");
-  console.log("\n" + "=".repeat(60));
-  console.log("🔐 SECURE DEMO CREDENTIALS (Save These Securely)");
-  console.log("=".repeat(60));
+  logger.info("✨ Seeding complete!");
+  logger.info("\n" + "=".repeat(60));
+  logger.info("🔐 SECURE DEMO CREDENTIALS (Save These Securely)");
+  logger.info("=".repeat(60));
 
   credentials.forEach(({ email, password, role }) => {
-    console.log(`\n${role.toUpperCase()}`);
-    console.log(`  Email:    ${email}`);
-    console.log(`  Password: ${password}`);
+    logger.info(`\n${role.toUpperCase()}`);
+    logger.info(`  Email:    ${email}`);
+    logger.info(`  Password: ${password}`);
   });
 
-  console.log("\n" + "=".repeat(60));
-  console.log("⚠️  IMPORTANT SECURITY NOTES:");
-  console.log("=".repeat(60));
-  console.log("1. Store these credentials in a secure password manager");
-  console.log("2. Delete this seed script from production");
-  console.log("3. Remove demo accounts before going live");
-  console.log("4. Change demo passwords after initial setup");
-  console.log("5. Never commit credentials to version control");
-  console.log("6. These passwords are cryptographically secure (128+ bits entropy)");
-  console.log("=".repeat(60) + "\n");
+  logger.info("\n" + "=".repeat(60));
+  logger.info("⚠️  IMPORTANT SECURITY NOTES:");
+  logger.info("=".repeat(60));
+  logger.info("1. Store these credentials in a secure password manager");
+  logger.info("2. Delete this seed script from production");
+  logger.info("3. Remove demo accounts before going live");
+  logger.info("4. Change demo passwords after initial setup");
+  logger.info("5. Never commit credentials to version control");
+  logger.info("6. These passwords are cryptographically secure (128+ bits entropy)");
+  logger.info("=".repeat(60) + "\n");
 }
 
 seedUsers().catch((error) => {
-  console.error("❌ Seeding failed:", error);
+  logger.error("❌ Seeding failed:", error);
   process.exit(1);
 });

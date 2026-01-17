@@ -10,6 +10,7 @@
  */
 
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
 
 /**
  * Set a secure HTTP-only cookie for planning participant selection
@@ -45,7 +46,7 @@ export async function setParticipantCookie(
 
     return true;
   } catch (error) {
-    console.error("[SECURITY] Failed to set participant cookie:", error);
+    logger.error("[SECURITY] Failed to set participant cookie:", error);
     return false;
   }
 }
@@ -69,7 +70,7 @@ export async function getParticipantCookie(
     const cookie = cookieStore.get(cookieName);
     return cookie?.value || null;
   } catch (error) {
-    console.error("[SECURITY] Failed to get participant cookie:", error);
+    logger.error("[SECURITY] Failed to get participant cookie:", error);
     return null;
   }
 }
@@ -91,7 +92,7 @@ export async function clearParticipantCookie(groupId: string): Promise<boolean> 
     cookieStore.delete(cookieName);
     return true;
   } catch (error) {
-    console.error("[SECURITY] Failed to clear participant cookie:", error);
+    logger.error("[SECURITY] Failed to clear participant cookie:", error);
     return false;
   }
 }
@@ -114,7 +115,7 @@ export async function validateParticipantCookie(
     const participantId = await getParticipantCookie(groupId);
     return participantId === expectedParticipantId;
   } catch (error) {
-    console.error("[SECURITY] Failed to validate participant cookie:", error);
+    logger.error("[SECURITY] Failed to validate participant cookie:", error);
     return false;
   }
 }

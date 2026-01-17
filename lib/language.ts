@@ -2,6 +2,7 @@ import de from './translations/de.json';
 import en from './translations/en.json';
 import ru from './translations/ru.json';
 import uk from './translations/uk.json';
+import { logger } from "@/lib/logger";
 
 /**
  * Supported language codes for the application
@@ -81,7 +82,7 @@ export function t(language: Language, key: string): string {
     } else {
       // Translation key not found - log in development
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`Missing translation: ${language}.${key}`);
+        logger.warn(`Missing translation: ${language}.${key}`);
       }
       return key;
     }
@@ -89,7 +90,7 @@ export function t(language: Language, key: string): string {
 
   // Ensure final value is a string
   if (typeof current !== 'string') {
-    console.warn(`Translation value is not a string: ${language}.${key}`);
+    logger.warn(`Translation value is not a string: ${language}.${key}`);
     return key;
   }
 

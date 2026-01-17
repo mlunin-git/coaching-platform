@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getSupabaseClient } from "@/lib/supabase";
+import { logger } from "@/lib/logger";
 
 interface IdeaFormProps {
   groupId: string;
@@ -54,7 +55,7 @@ export function IdeaForm({
         .eq("idea_id", initialIdea.id);
 
       if (votesError && votesError.code !== "PGRST116") {
-        console.error("Error deleting votes:", votesError);
+        logger.error("Error deleting votes:", votesError);
       }
 
       // Delete the idea
@@ -64,7 +65,7 @@ export function IdeaForm({
         .eq("id", initialIdea.id);
 
       if (deleteError) {
-        console.error("Error deleting idea:", deleteError);
+        logger.error("Error deleting idea:", deleteError);
         setError(`Error: ${deleteError.message}` || t("planning.error.unknown"));
         setLoading(false);
         return;
@@ -73,7 +74,7 @@ export function IdeaForm({
       setLoading(false);
       onSuccess();
     } catch (err) {
-      console.error("Delete exception:", err);
+      logger.error("Delete exception:", err);
       setError(err instanceof Error ? err.message : t("planning.error.unknown"));
       setLoading(false);
     }

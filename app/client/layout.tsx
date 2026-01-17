@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import type { Database } from "@/lib/database.types";
+import { logger } from "@/lib/logger";
 
 export default function ClientLayout({
   children,
@@ -36,7 +37,7 @@ export default function ClientLayout({
         .then(({ data, error }) => {
           const userData = data as Database["public"]["Tables"]["users"]["Row"] | null;
           if (error || !userData || userData.role !== "client" || !userData.has_auth_access) {
-            console.error("Client layout auth error:", error);
+            logger.error("Client layout auth error:", error);
             router.push("/auth/login");
           } else {
             setUser(userData);

@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import { logger } from "@/lib/logger";
 
 /**
  * Sentry configuration for server-side error monitoring
@@ -6,7 +7,7 @@ import * as Sentry from "@sentry/nextjs";
  */
 export function initializeSentry() {
   if (!process.env.NEXT_PUBLIC_SENTRY_DSN) {
-    console.warn("Sentry DSN not configured. Error monitoring disabled.");
+    logger.warn("Sentry DSN not configured. Error monitoring disabled.");
     return;
   }
 
