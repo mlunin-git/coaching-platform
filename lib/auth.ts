@@ -148,6 +148,21 @@ export async function signInRateLimited(email: string, password: string) {
       );
     }
 
+    // Set the session on the Supabase client
+    const session = data.session as Record<string, unknown> | undefined;
+    if (session) {
+      const supabase = getSupabaseClient();
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: session.access_token as string,
+        refresh_token: session.refresh_token as string,
+      });
+
+      if (sessionError) {
+        logger.error("Failed to set session", sessionError);
+        throw new Error("Failed to establish session");
+      }
+    }
+
     return data;
   } catch (error) {
     logger.error("Login error", error);
