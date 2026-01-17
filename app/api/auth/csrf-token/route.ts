@@ -19,7 +19,15 @@ import { logger } from "@/lib/logger";
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Get client IP to create session ID (same as middleware)
-    const ip = getClientIP(request);
+    let ip = getClientIP(request);
+
+    // On localhost/development, use a fallback
+    if (!ip || ip === "unknown" || ip === "::") {
+      // Use a fixed session ID for development, or use browser user agent
+      const userAgent = request.headers.get("user-agent") || "unknown";
+      ip = `dev-${userAgent.substring(0, 20)}`;
+    }
+
     const sessionId = `session-${ip}`;
 
     // Check if token already exists for this session

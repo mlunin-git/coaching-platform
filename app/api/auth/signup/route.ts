@@ -57,7 +57,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const validatedRole = role as "coach" | "client";
 
     // Get client IP (rate limit by IP for signup)
-    const ip = getClientIP(request);
+    let ip = getClientIP(request);
+
+    // On localhost/development, use a fallback
+    if (!ip || ip === "unknown" || ip === "::") {
+      // Use browser user agent for consistent session ID
+      const userAgent = request.headers.get("user-agent") || "unknown";
+      ip = `dev-${userAgent.substring(0, 20)}`;
+    }
 
     // Check rate limit
     const rateLimitResult = await signupRateLimiter(ip);

@@ -40,7 +40,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Get client IP
-    const ip = getClientIP(request);
+    let ip = getClientIP(request);
+
+    // On localhost/development, use a fallback
+    if (!ip || ip === "unknown" || ip === "::") {
+      // Use browser user agent for consistent session ID
+      const userAgent = request.headers.get("user-agent") || "unknown";
+      ip = `dev-${userAgent.substring(0, 20)}`;
+    }
 
     // Create rate limit identifier (email + IP)
     const identifier = createRateLimitIdentifier(email, ip);

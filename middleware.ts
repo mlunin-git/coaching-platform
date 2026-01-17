@@ -45,7 +45,15 @@ export const config = {
 function getOrCreateSessionId(request: NextRequest): string {
   // In production, use actual session management (NextAuth.js, etc.)
   // For now, use IP address as session identifier for CSRF protection
-  const ip = getClientIP(request);
+  let ip = getClientIP(request);
+
+  // On localhost/development, use a fallback
+  if (!ip || ip === "unknown" || ip === "::") {
+    // Use browser user agent for consistent session ID
+    const userAgent = request.headers.get("user-agent") || "unknown";
+    ip = `dev-${userAgent.substring(0, 20)}`;
+  }
+
   return `session-${ip}`;
 }
 
