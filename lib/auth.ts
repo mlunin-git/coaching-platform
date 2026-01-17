@@ -1,8 +1,57 @@
 import { getSupabaseClient } from "./supabase";
+import { logger } from "./logger";
 import type { Database } from "./database.types";
 
 type User = Database["public"]["Tables"]["users"]["Row"];
 
+/**
+ * Sign up with rate limiting via API route
+ * Recommended for public signup endpoints
+ *
+ * @param email - User email
+ * @param password - User password
+ * @param name - User name
+ * @param role - User role (coach or client)
+ * @returns Auth data with user info
+ *
+ * @throws Error if signup fails or rate limited
+ */
+export async function signUpRateLimited(
+  email: string,
+  password: string,
+  name: string,
+  role: "coach" | "client"
+) {
+  try {
+    const response = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password, name, role }),
+    });
+
+    const data = (await response.json()) as Record<string, unknown>;
+
+    if (!response.ok) {
+      throw new Error(
+        (data.error as string) || "Signup failed"
+      );
+    }
+
+    return data;
+  } catch (error) {
+    logger.error("Signup error", error);
+    throw error;
+  }
+}
+
+/**
+ * Sign up without rate limiting (direct Supabase)
+ * Use signUpRateLimited() instead for public endpoints
+ *
+ * @deprecated Use signUpRateLimited() instead
+ */
 export async function signUp(email: string, password: string, name: string, role: "coach" | "client") {
   const supabase = getSupabaseClient();
 
@@ -30,6 +79,56 @@ export async function signUp(email: string, password: string, name: string, role
   return data;
 }
 
+/**
+ * Sign in with rate limiting via API route
+ * Recommended for public login endpoints
+ *
+ * @param email - User email
+ * @param password - User password
+ * @returns Session and user data
+ *
+ * @throws Error if login fails or rate limited
+ *
+ * @example
+ * try {
+ *   const { session, user } = await signInRateLimited(email, password);
+ * } catch (error) {
+ *   if (error.message.includes("Too many")) {
+ *     // Handle rate limiting
+ *   }
+ * }
+ */
+export async function signInRateLimited(email: string, password: string) {
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = (await response.json()) as Record<string, unknown>;
+
+    if (!response.ok) {
+      throw new Error(
+        (data.error as string) || "Login failed"
+      );
+    }
+
+    return data;
+  } catch (error) {
+    logger.error("Login error", error);
+    throw error;
+  }
+}
+
+/**
+ * Sign in without rate limiting (direct Supabase)
+ * Use signInRateLimited() instead for public endpoints
+ *
+ * @deprecated Use signInRateLimited() instead
+ */
 export async function signIn(email: string, password: string) {
   const supabase = getSupabaseClient();
 
