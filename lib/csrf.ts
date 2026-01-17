@@ -120,6 +120,13 @@ export function storeCSRFToken(
     token,
     expiresAt: Date.now() + expiryMs,
   });
+
+  logger.debug("CSRF token stored", {
+    sessionId: sessionId.substring(0, 10),
+    tokenPrefix: token.substring(0, 10),
+    expiryMs,
+    tokenStoreSize: tokenStore.size,
+  });
 }
 
 /**
@@ -176,6 +183,8 @@ export function validateCSRFToken(sessionId: string, token: string): boolean {
   if (!storedToken) {
     logger.warn("CSRF token not found for session", {
       sessionId: sessionId.substring(0, 10),
+      tokenStoreSize: tokenStore.size,
+      availableSessions: Array.from(tokenStore.keys()).slice(0, 3).join(", "),
     });
     return false;
   }
@@ -186,10 +195,15 @@ export function validateCSRFToken(sessionId: string, token: string): boolean {
   if (!isValid) {
     logger.warn("CSRF token mismatch", {
       sessionId: sessionId.substring(0, 10),
+      providedTokenPrefix: token.substring(0, 10),
+      storedTokenPrefix: storedToken.substring(0, 10),
     });
   } else {
     // Consume the token (remove after use)
     tokenStore.delete(sessionId);
+    logger.debug("CSRF token validated and consumed", {
+      sessionId: sessionId.substring(0, 10),
+    });
   }
 
   return isValid;

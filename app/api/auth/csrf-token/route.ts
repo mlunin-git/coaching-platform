@@ -30,6 +30,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const sessionId = `session-${ip}`;
 
+    logger.debug("CSRF token endpoint called", {
+      sessionId: sessionId.substring(0, 10),
+      ip: ip.substring(0, 20),
+    });
+
     // Check if token already exists for this session
     let token = getCSRFToken(sessionId);
 
@@ -37,6 +42,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     if (!token) {
       token = generateCSRFToken();
       storeCSRFToken(sessionId, token);
+      logger.debug("Generated new CSRF token", {
+        sessionId: sessionId.substring(0, 10),
+      });
+    } else {
+      logger.debug("Reusing existing CSRF token", {
+        sessionId: sessionId.substring(0, 10),
+      });
     }
 
     // Return token in response

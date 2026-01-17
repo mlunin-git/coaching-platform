@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
               script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://js.sentry-cdn.com;
               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
               font-src 'self' https://fonts.gstatic.com;
-              connect-src 'self' https://*.sentry.io;
+              connect-src 'self' https://*.sentry.io https://*.supabase.co;
               img-src 'self' data: https:;
               frame-ancestors 'none';
               base-uri 'self';
