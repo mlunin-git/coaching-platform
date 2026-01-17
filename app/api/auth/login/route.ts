@@ -52,11 +52,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Create rate limit identifier (email + IP)
     const identifier = createRateLimitIdentifier(email, ip);
 
-    // CSRF validation
-    const csrfSessionId = `session-${ip}`;
+    // CSRF validation - read session ID from cookie instead of recreating it
+    let csrfSessionId = request.cookies.get("csrf-session")?.value;
+
+    if (!csrfSessionId) {
+      // Fallback to recreating session ID if cookie not present
+      csrfSessionId = `session-${ip}`;
+    }
+
     const csrfError = await validateCSRFFromRequest(request, csrfSessionId);
     if (csrfError) {
-      logger.warn("CSRF validation failed on login", { error: csrfError });
+      logger.warn("CSRF validation failed on login", { error: csrfError, csrfSessionId });
       return NextResponse.json(
         { error: "CSRF validation failed" },
         { status: 403 }
