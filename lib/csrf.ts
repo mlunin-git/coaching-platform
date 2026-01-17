@@ -77,21 +77,43 @@ export function verifyCSRFToken(token: string, storedToken: string): boolean {
 /**
  * CSRF token storage (in-memory, production should use session/database)
  *
- * Maps user sessions to their CSRF tokens
+ * Maps user sessions to their CSRF tokens.
+ * Stored on globalThis to survive Next.js hot module reloads during development.
  */
-const tokenStore = new Map<string, { token: string; expiresAt: number }>();
+const getTokenStore = () => {
+  if (!globalThis.csrfTokenStore) {
+    globalThis.csrfTokenStore = new Map<
+      string,
+      { token: string; expiresAt: number }
+    >();
 
-/**
- * Cleanup interval (5 minutes) to remove expired tokens
- */
-const cleanupInterval = setInterval(() => {
-  const now = Date.now();
-  for (const [key, value] of tokenStore.entries()) {
-    if (value.expiresAt < now) {
-      tokenStore.delete(key);
+    // Setup cleanup interval only once
+    if (!globalThis.csrfCleanupInterval) {
+      globalThis.csrfCleanupInterval = setInterval(() => {
+        const now = Date.now();
+        const store = globalThis.csrfTokenStore as Map<
+          string,
+          { token: string; expiresAt: number }
+        >;
+        for (const [key, value] of store.entries()) {
+          if (value.expiresAt < now) {
+            store.delete(key);
+          }
+        }
+      }, 5 * 60 * 1000);
     }
   }
-}, 5 * 60 * 1000);
+
+  return globalThis.csrfTokenStore as Map<
+    string,
+    { token: string; expiresAt: number }
+  >;
+};
+
+declare global {
+  var csrfTokenStore: Map<string, { token: string; expiresAt: number }> | undefined;
+  var csrfCleanupInterval: NodeJS.Timeout | undefined;
+}
 
 /**
  * Store a CSRF token for a session
@@ -116,6 +138,7 @@ export function storeCSRFToken(
     return;
   }
 
+  const tokenStore = getTokenStore();
   tokenStore.set(sessionId, {
     token,
     expiresAt: Date.now() + expiryMs,
@@ -143,6 +166,7 @@ export function getCSRFToken(sessionId: string): string | null {
     return null;
   }
 
+  const tokenStore = getTokenStore();
   const entry = tokenStore.get(sessionId);
 
   if (!entry) {
@@ -181,6 +205,7 @@ export function validateCSRFToken(sessionId: string, token: string): boolean {
   const storedToken = getCSRFToken(sessionId);
 
   if (!storedToken) {
+    const tokenStore = getTokenStore();
     logger.warn("CSRF token not found for session", {
       sessionId: sessionId.substring(0, 10),
       tokenStoreSize: tokenStore.size,
@@ -200,6 +225,7 @@ export function validateCSRFToken(sessionId: string, token: string): boolean {
     });
   } else {
     // Consume the token (remove after use)
+    const tokenStore = getTokenStore();
     tokenStore.delete(sessionId);
     logger.debug("CSRF token validated and consumed", {
       sessionId: sessionId.substring(0, 10),
@@ -219,6 +245,7 @@ export function validateCSRFToken(sessionId: string, token: string): boolean {
  */
 export function clearCSRFToken(sessionId: string): void {
   if (sessionId) {
+    const tokenStore = getTokenStore();
     tokenStore.delete(sessionId);
   }
 }
@@ -227,8 +254,14 @@ export function clearCSRFToken(sessionId: string): void {
  * Cleanup resources when server shuts down
  */
 export function cleanupCSRF(): void {
-  clearInterval(cleanupInterval);
-  tokenStore.clear();
+  if (globalThis.csrfCleanupInterval) {
+    clearInterval(globalThis.csrfCleanupInterval);
+    globalThis.csrfCleanupInterval = undefined;
+  }
+  if (globalThis.csrfTokenStore) {
+    globalThis.csrfTokenStore.clear();
+    globalThis.csrfTokenStore = undefined;
+  }
 }
 
 /**
