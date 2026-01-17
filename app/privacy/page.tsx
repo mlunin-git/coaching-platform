@@ -28,7 +28,7 @@ export default function PrivacyPage() {
 
           {/* Last Updated */}
           <p className="text-sm text-gray-500">
-            Last Updated: 2026-01-15
+            Last Updated: 2026-01-17
           </p>
         </div>
 
@@ -69,8 +69,12 @@ export default function PrivacyPage() {
                   tasks, and other content you create
                 </li>
                 <li>
-                  <strong>Technical Data:</strong> IP address, browser type,
-                  operating system, and usage patterns
+                  <strong>Analytics Data:</strong> Page views, session duration,
+                  and navigation patterns (see Analytics Tracking section for details)
+                </li>
+                <li>
+                  <strong>Technical Data:</strong> Browser type, operating system,
+                  and user agent (no IP addresses collected)
                 </li>
                 <li>
                   <strong>Communication Data:</strong> Messages exchanged between
@@ -93,6 +97,56 @@ export default function PrivacyPage() {
                 <li>Detecting and preventing fraudulent activity</li>
                 <li>Responding to user inquiries and support requests</li>
               </ul>
+            </section>
+
+            {/* Analytics Tracking */}
+            <section className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-indigo-600">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Analytics Tracking
+              </h2>
+              <p className="mb-4 text-gray-700">
+                We track user interactions to understand how our platform is used
+                and to improve the user experience. This includes:
+              </p>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">What We Track:</h3>
+                  <ul className="list-disc list-inside space-y-1 text-gray-700 text-sm">
+                    <li>Page views and navigation patterns</li>
+                    <li>Time spent on each page (session duration)</li>
+                    <li>Browser type and operating system (user agent)</li>
+                    <li>Unique session identifier (generated per browser tab)</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">What We Don&apos;t Track:</h3>
+                  <ul className="list-disc list-inside space-y-1 text-gray-700 text-sm">
+                    <li>IP addresses</li>
+                    <li>Precise geolocation data</li>
+                    <li>Personal identification details of anonymous users</li>
+                    <li>Mouse movements or keystroke data</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Session Management:</h3>
+                  <p className="text-gray-700 text-sm">
+                    Session tracking uses your browser&apos;s sessionStorage, which is
+                    cleared when you close the browser tab or window. Each new tab
+                    generates a unique session identifier. Authenticated users are
+                    linked to their accounts; anonymous users are tracked with a null
+                    user identifier.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Data Retention:</h3>
+                  <p className="text-gray-700 text-sm">
+                    Analytics events are retained in our database indefinitely. Session
+                    data stored in your browser (sessionStorage) expires automatically
+                    when you close the tab. You can delete your analytics history by
+                    requesting account deletion.
+                  </p>
+                </div>
+              </div>
             </section>
 
             {/* Data Security */}

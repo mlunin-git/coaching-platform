@@ -41,6 +41,13 @@ export function NavigationMenuItems({
               >
                 💬 {t("coach.messages")}
               </Link>
+              <Link
+                href="/coach/admin"
+                onClick={onLinkClick}
+                className={linkClassName}
+              >
+                🔧 {t("admin.title") || "Admin"}
+              </Link>
             </>
           )}
 

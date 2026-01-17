@@ -4,12 +4,6 @@ import { withSentryConfig } from "@sentry/nextjs";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
-  // Sentry configuration for error monitoring
-  sentry: {
-    autoInstrumentServerFunctions: true,
-    autoInstrumentMiddleware: true,
-  },
-
   // Security headers
   headers: async () => {
     return [
