@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getSupabaseClient } from "@/lib/supabase";
+import { useParticipantSelection } from "@/hooks/useParticipantSelection";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import {
   getGroupParticipants,
@@ -66,7 +67,6 @@ export default function GroupPage() {
   const groupId = params.groupId as string;
 
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>("ideas");
@@ -77,21 +77,14 @@ export default function GroupPage() {
   const [showEventForm, setShowEventForm] = useState(false);
   const [attendingEventIds, setAttendingEventIds] = useState<Set<string>>(new Set());
 
-  // Load saved participant selection
-  useEffect(() => {
-    const saved = sessionStorage.getItem(`planning_participant_${groupId}`);
-    if (saved && participants.length > 0) {
-      // Validate that the saved participant still exists
-      const participantExists = participants.some(p => p.id === saved);
-      if (participantExists) {
-        setSelectedParticipantId(saved);
-      } else {
-        // Clear invalid saved participant
-        sessionStorage.removeItem(`planning_participant_${groupId}`);
-        setSelectedParticipantId(null);
-      }
-    }
-  }, [groupId, participants]);
+  // Use secure HTTP-only cookie for participant selection (replaces sessionStorage)
+  const {
+    selectedParticipantId,
+    setSelectedParticipant: setParticipantSelectionAsync,
+  } = useParticipantSelection({
+    groupId,
+    availableParticipants: participants,
+  });
 
   const [error, setError] = useState<string | null>(null);
 
@@ -156,10 +149,13 @@ export default function GroupPage() {
     };
   }, [groupId]);
 
-  const handleParticipantSelect = (participantId: string) => {
-    setSelectedParticipantId(participantId);
-    sessionStorage.setItem(`planning_participant_${groupId}`, participantId);
-  };
+  const handleParticipantSelect = useCallback(
+    async (participantId: string) => {
+      // Use secure HTTP-only cookie (replaces sessionStorage)
+      await setParticipantSelectionAsync(participantId);
+    },
+    [setParticipantSelectionAsync]
+  );
 
   const handleDataRefresh = useCallback(async () => {
     if (!actualGroupId) return;
