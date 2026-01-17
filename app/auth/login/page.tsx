@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn, getUserByAuthId } from "@/lib/auth";
+import { signInRateLimited, getUserByAuthId } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,10 +18,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const data = await signIn(email, password);
+      const data = (await signInRateLimited(email, password)) as Record<string, unknown>;
 
       // Get user profile by auth_user_id to check role
-      const profile = await getUserByAuthId(data.user.id);
+      const userId = (data.user as Record<string, unknown> | undefined)?.id as string;
+      const profile = await getUserByAuthId(userId);
 
       if (profile.role === "coach") {
         router.push("/coach/clients");

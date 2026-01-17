@@ -53,6 +53,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    // Type-cast role after validation
+    const validatedRole = role as "coach" | "client";
+
     // Get client IP (rate limit by IP for signup)
     const ip = getClientIP(request);
 
@@ -124,14 +127,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Create user profile in database
     try {
       // Type assertion needed due to Supabase generic type complexity
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: profileError } = await (supabase
         .from("users")
         .insert({
           auth_user_id: data.user.id,
           email: data.user.email,
           name,
-          role,
+          role: validatedRole,
           has_auth_access: true,
           client_identifier: null,
         }) as any);

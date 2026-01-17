@@ -23,11 +23,27 @@ export async function signUpRateLimited(
   role: "coach" | "client"
 ) {
   try {
+    // Fetch CSRF token first
+    const csrfResponse = await fetch("/api/auth/csrf-token", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const csrfData = (await csrfResponse.json()) as Record<string, unknown>;
+    const csrfToken = csrfData.token as string;
+
+    if (!csrfToken) {
+      throw new Error("Failed to obtain CSRF token");
+    }
+
+    // Now submit signup with CSRF token
     const response = await fetch("/api/auth/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-csrf-token": csrfToken,
       },
+      credentials: "include",
       body: JSON.stringify({ email, password, name, role }),
     });
 
@@ -100,11 +116,27 @@ export async function signUp(email: string, password: string, name: string, role
  */
 export async function signInRateLimited(email: string, password: string) {
   try {
+    // Fetch CSRF token first
+    const csrfResponse = await fetch("/api/auth/csrf-token", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const csrfData = (await csrfResponse.json()) as Record<string, unknown>;
+    const csrfToken = csrfData.token as string;
+
+    if (!csrfToken) {
+      throw new Error("Failed to obtain CSRF token");
+    }
+
+    // Now submit login with CSRF token
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-csrf-token": csrfToken,
       },
+      credentials: "include",
       body: JSON.stringify({ email, password }),
     });
 

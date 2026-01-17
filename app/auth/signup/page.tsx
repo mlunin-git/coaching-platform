@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signUp } from "@/lib/auth";
+import { signUpRateLimited } from "@/lib/auth";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -20,7 +20,7 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      await signUp(email, password, name, role);
+      await signUpRateLimited(email, password, name, role);
 
       if (role === "coach") {
         router.push("/coach/clients");

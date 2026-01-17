@@ -3,6 +3,7 @@
  *
  * This middleware runs before each request and applies:
  * - Rate limiting to authentication endpoints
+ * - CSRF token validation and generation
  * - Security headers
  * - Request logging and monitoring
  */
@@ -14,6 +15,11 @@ import {
   getClientIP,
   createRateLimitIdentifier,
 } from "@/lib/rate-limiter";
+import {
+  generateCSRFToken,
+  storeCSRFToken,
+  validateCSRFFromRequest,
+} from "@/lib/csrf";
 
 /**
  * Middleware configuration
@@ -34,23 +40,59 @@ export const config = {
 };
 
 /**
+ * Get or create session ID from request
+ */
+function getOrCreateSessionId(request: NextRequest): string {
+  // In production, use actual session management (NextAuth.js, etc.)
+  // For now, use IP address as session identifier for CSRF protection
+  const ip = getClientIP(request);
+  return `session-${ip}`;
+}
+
+/**
  * Main middleware function
  */
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl;
   const pathname = url.pathname;
+  const method = request.method;
 
-  // Apply rate limiting to auth endpoints
-  if (pathname === "/auth/login" && request.method === "POST") {
+  // Apply rate limiting and CSRF protection to auth endpoints
+  if (pathname === "/auth/login" && method === "POST") {
     return await handleLoginRateLimit(request);
   }
 
-  if (pathname === "/auth/signup" && request.method === "POST") {
+  if (pathname === "/auth/signup" && method === "POST") {
     return await handleSignupRateLimit(request);
   }
 
+  // Add CSRF token to GET requests for forms (store in response headers for client)
+  if ((pathname === "/auth/login" || pathname === "/auth/signup") && method === "GET") {
+    const sessionId = getOrCreateSessionId(request);
+    const csrfToken = generateCSRFToken();
+
+    // Store token server-side
+    storeCSRFToken(sessionId, csrfToken);
+
+    // Add token to response headers for client to use
+    const response = NextResponse.next();
+    response.headers.set("X-CSRF-Token", csrfToken);
+    response.headers.set("Set-Cookie", `csrf-session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Strict`);
+
+    return response;
+  }
+
   // Continue with normal request processing
-  return NextResponse.next();
+  const response = NextResponse.next();
+
+  // Set secure cookie flags globally (works with next/headers cookies too)
+  // Note: This sets the SameSite flag for all cookies
+  response.headers.set(
+    "Set-Cookie",
+    `SameSite=Strict; Secure; Path=/`
+  );
+
+  return response;
 }
 
 /**

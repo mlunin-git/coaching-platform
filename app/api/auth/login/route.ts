@@ -12,6 +12,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { loginRateLimiter, getClientIP, createRateLimitIdentifier } from "@/lib/rate-limiter";
+import { validateCSRFFromRequest, clearCSRFToken } from "@/lib/csrf";
 import { logger } from "@/lib/logger";
 
 /**
@@ -43,6 +44,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Create rate limit identifier (email + IP)
     const identifier = createRateLimitIdentifier(email, ip);
+
+    // CSRF validation
+    const csrfSessionId = `session-${ip}`;
+    const csrfError = await validateCSRFFromRequest(request, csrfSessionId);
+    if (csrfError) {
+      logger.warn("CSRF validation failed on login", { error: csrfError });
+      return NextResponse.json(
+        { error: "CSRF validation failed" },
+        { status: 403 }
+      );
+    }
 
     // Check rate limit
     const rateLimitResult = await loginRateLimiter(identifier);

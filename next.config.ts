@@ -9,6 +9,79 @@ const nextConfig: NextConfig = {
     autoInstrumentServerFunctions: true,
     autoInstrumentMiddleware: true,
   },
+
+  // Security headers
+  headers: async () => {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          // Content Security Policy - prevents XSS, injection attacks
+          {
+            key: "Content-Security-Policy",
+            value: `
+              default-src 'self';
+              script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://js.sentry-cdn.com;
+              style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+              font-src 'self' https://fonts.gstatic.com;
+              connect-src 'self' https://*.sentry.io;
+              img-src 'self' data: https:;
+              frame-ancestors 'none';
+              base-uri 'self';
+              form-action 'self';
+            `.replace(/\s+/g, " "),
+          },
+
+          // Prevent clickjacking attacks
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+
+          // Prevent MIME sniffing
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+
+          // Enable XSS protection in older browsers
+          {
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
+          },
+
+          // Referrer policy - privacy & security
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+
+          // Permissions policy - disable unnecessary APIs
+          {
+            key: "Permissions-Policy",
+            value:
+              "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()",
+          },
+
+          // HSTS - force HTTPS (only on production)
+          ...(process.env.NODE_ENV === "production"
+            ? [
+                {
+                  key: "Strict-Transport-Security",
+                  value: "max-age=63072000; includeSubDomains; preload",
+                },
+              ]
+            : []),
+
+          // Prevent browsers from guessing MIME types
+          {
+            key: "X-Permitted-Cross-Domain-Policies",
+            value: "none",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 // Wrap with Sentry configuration
