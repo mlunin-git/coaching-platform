@@ -2,24 +2,35 @@
  * Test setup and mock utilities for hooks
  */
 
+interface SupabaseOptions {
+  ascending?: boolean;
+}
+
+interface MockChannel {
+  name: string;
+  listeners: Array<{ event: string; config: unknown; callback: unknown }>;
+  on: (event: string, config: unknown, callback: unknown) => MockChannel;
+  subscribe: (callback?: (status: string) => void) => MockChannel;
+}
+
 // Mock for Supabase client
 export const createMockSupabaseClient = () => {
-  const channels: Record<string, any> = {};
+  const channels: Record<string, MockChannel> = {};
 
   return {
     from: (table: string) => ({
       select: (fields: string) => ({
-        eq: (field: string, value: any) => ({
+        eq: (field: string, value: unknown) => ({
           single: async () => ({ data: null, error: null }),
-          order: (field: string, options: any) => ({
+          order: (field: string, options: SupabaseOptions) => ({
             limit: (count: number) => ({
               data: [],
               error: null,
             }),
           }),
-          not: (field: string, operator: string, value: any) => ({
+          not: (field: string, operator: string, value: unknown) => ({
             like: (field: string, pattern: string) => ({
-              order: (field: string, options: any) => ({
+              order: (field: string, options: SupabaseOptions) => ({
                 limit: (count: number) => ({
                   data: [],
                   error: null,
@@ -31,12 +42,12 @@ export const createMockSupabaseClient = () => {
       }),
     }),
 
-    channel: (name: string) => {
+    channel: (name: string): MockChannel => {
       if (!channels[name]) {
         channels[name] = {
           name,
           listeners: [],
-          on: function(event: string, config: any, callback: any) {
+          on: function(event: string, config: unknown, callback: unknown) {
             this.listeners.push({ event, config, callback });
             return this;
           },
@@ -49,7 +60,7 @@ export const createMockSupabaseClient = () => {
       return channels[name];
     },
 
-    removeChannel: (channel: any) => {
+    removeChannel: (channel: MockChannel) => {
       if (channel && channel.name) {
         delete channels[channel.name];
       }

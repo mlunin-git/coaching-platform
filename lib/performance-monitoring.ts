@@ -16,6 +16,14 @@ export interface PerformanceMetric {
 }
 
 /**
+ * Layout Shift entry for CLS (Cumulative Layout Shift) tracking
+ */
+interface LayoutShift {
+  hadRecentInput: boolean;
+  value: number;
+}
+
+/**
  * Start a performance timer for measuring operation duration
  *
  * @param operationName - Name of the operation being measured
@@ -186,9 +194,11 @@ export function trackWebVitals(): void {
   try {
     let clsValue = 0;
     const clsObserver = new PerformanceObserver((list) => {
-      list.getEntries().forEach((entry: any) => {
-        if (!entry.hadRecentInput) {
-          clsValue += entry.value;
+      list.getEntries().forEach((entry) => {
+        // LayoutShift entries have hadRecentInput and value properties
+        const layoutShiftEntry = entry as unknown as LayoutShift;
+        if (!layoutShiftEntry.hadRecentInput) {
+          clsValue += layoutShiftEntry.value;
           recordMetric({
             name: 'web_vital_cls',
             value: clsValue,

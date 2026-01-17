@@ -66,7 +66,20 @@ export function YearlyChart({
   }
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
+  interface TooltipPayload {
+    payload: {
+      name: string;
+      planned: number;
+      archived: number;
+    };
+  }
+
+  interface TooltipProps {
+    active?: boolean;
+    payload?: TooltipPayload[];
+  }
+
+  const CustomTooltip = ({ active, payload }: TooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (

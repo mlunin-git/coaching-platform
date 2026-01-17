@@ -8,6 +8,18 @@ import type { Database } from "@/lib/database.types";
 type Client = Database["public"]["Tables"]["clients"]["Row"];
 type Task = Database["public"]["Tables"]["tasks"]["Row"];
 
+interface RawClientTask {
+  id: string;
+  status: "pending" | "completed";
+  completed_at: string | null;
+  tasks: {
+    id: string;
+    title: string;
+    description: string | null;
+    created_at: string;
+  };
+}
+
 interface ClientTask {
   id: string;
   title: string;
@@ -105,7 +117,7 @@ export default function ClientDetailPage() {
 
       if (tasksError) throw tasksError;
 
-      const transformedTasks = (data || []).map((item: any) => ({
+      const transformedTasks = (data as RawClientTask[] || []).map((item) => ({
         id: item.tasks.id,
         clientTaskId: item.id,
         title: item.tasks.title,
