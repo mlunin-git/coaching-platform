@@ -77,7 +77,12 @@ export async function middleware(request: NextRequest) {
     // Add token to response headers for client to use
     const response = NextResponse.next();
     response.headers.set("X-CSRF-Token", csrfToken);
-    response.headers.set("Set-Cookie", `csrf-session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Strict`);
+    const isProduction = process.env.NODE_ENV === "production";
+    const secureFlag = isProduction ? "; Secure" : "";
+    response.headers.set(
+      "Set-Cookie",
+      `csrf-session=${sessionId}; Path=/; HttpOnly${secureFlag}; SameSite=Strict`
+    );
 
     return response;
   }

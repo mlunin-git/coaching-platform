@@ -39,10 +39,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       { status: 200 }
     );
 
-    // Set session cookie for CSRF tracking
+    // Set session cookie for CSRF tracking (no Secure flag for localhost/development)
+    const isProduction = process.env.NODE_ENV === "production";
+    const secureFlag = isProduction ? "; Secure" : "";
     response.headers.set(
       "Set-Cookie",
-      `csrf-session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Strict`
+      `csrf-session=${sessionId}; Path=/; HttpOnly${secureFlag}; SameSite=Strict`
     );
 
     return response;
