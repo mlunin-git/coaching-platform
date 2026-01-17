@@ -47,12 +47,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       { status: 200 }
     );
 
-    // Set session cookie for CSRF tracking (no Secure flag for localhost/development)
+    // Set session cookie for CSRF tracking
     const isProduction = process.env.NODE_ENV === "production";
     const secureFlag = isProduction ? "; Secure" : "";
+    // Use SameSite=Lax on development (Strict can break localhost cookies)
+    const sameSite = isProduction ? "SameSite=Strict" : "SameSite=Lax";
     response.headers.set(
       "Set-Cookie",
-      `csrf-session=${sessionId}; Path=/; HttpOnly${secureFlag}; SameSite=Strict`
+      `csrf-session=${sessionId}; Path=/; HttpOnly${secureFlag}; ${sameSite}`
     );
 
     return response;

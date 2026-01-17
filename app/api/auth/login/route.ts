@@ -54,15 +54,26 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // CSRF validation - read session ID from cookie instead of recreating it
     let csrfSessionId = request.cookies.get("csrf-session")?.value;
+    const hasCookie = !!csrfSessionId;
 
     if (!csrfSessionId) {
       // Fallback to recreating session ID if cookie not present
       csrfSessionId = `session-${ip}`;
     }
 
+    logger.debug("CSRF validation attempt", {
+      hasCookie,
+      csrfSessionId: csrfSessionId.substring(0, 20),
+      ip: ip.substring(0, 20),
+    });
+
     const csrfError = await validateCSRFFromRequest(request, csrfSessionId);
     if (csrfError) {
-      logger.warn("CSRF validation failed on login", { error: csrfError, csrfSessionId });
+      logger.warn("CSRF validation failed on login", {
+        error: csrfError,
+        csrfSessionId: csrfSessionId.substring(0, 20),
+        hasCookie,
+      });
       return NextResponse.json(
         { error: "CSRF validation failed" },
         { status: 403 }
