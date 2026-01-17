@@ -7,7 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export function Footer() {
   const { t } = useLanguage();
   const currentYear = new Date().getFullYear();
-  const lastUpdated = format(new Date("2026-01-15"), "MMMM d, yyyy");
+  const lastUpdated = format(new Date("2026-01-17"), "MMMM d, yyyy");
 
   return (
     <footer className="bg-white border-t border-gray-200 mt-12">

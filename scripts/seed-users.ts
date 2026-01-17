@@ -4,12 +4,21 @@
  * Seed script to create default users in Supabase Auth
  * Run: npx ts-node scripts/seed-users.ts
  *
+ * ⚠️  SECURITY WARNING:
+ * - This script generates SECURE random passwords for each user
+ * - Passwords are logged to console after creation
+ * - Store these passwords securely (password manager, secure vault)
+ * - DELETE this script before production deployment
+ * - DO NOT commit passwords to version control
+ * - Change demo account passwords before go-live
+ *
  * Creates:
- * - Coach: coach@example.com / demo123
- * - Client: client@example.com / demo123
+ * - Coach: coach@example.com / [secure generated password]
+ * - Client: client@example.com / [secure generated password]
  */
 
 import { createClient } from "@supabase/supabase-js";
+import { generateSecurePassword } from "../lib/password-generator";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -37,34 +46,50 @@ if (!SUPABASE_SERVICE_KEY) {
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+interface SeedUser {
+  email: string;
+  name: string;
+  role: 'coach' | 'client';
+  userId: string;
+}
+
 async function seedUsers() {
   console.log("🌱 Seeding default users...\n");
+  console.log("⚠️  Generating secure passwords for demo accounts...\n");
 
-  const users = [
+  const users: SeedUser[] = [
     {
       email: "coach@example.com",
-      password: "demo123",
       name: "Demo Coach",
       role: "coach",
       userId: "11111111-1111-1111-1111-111111111111",
     },
     {
       email: "client@example.com",
-      password: "demo123",
       name: "Demo Client",
       role: "client",
       userId: "22222222-2222-2222-2222-222222222222",
     },
   ];
 
+  const credentials: Array<{ email: string; password: string; role: string }> = [];
+
   for (const user of users) {
     try {
+      // Generate secure password
+      const securePassword = generateSecurePassword();
+      credentials.push({
+        email: user.email,
+        password: securePassword,
+        role: user.role,
+      });
+
       console.log(`📧 Creating ${user.role}: ${user.email}...`);
 
-      // Create Auth user
+      // Create Auth user with secure password
       const { data, error } = await supabaseAdmin.auth.admin.createUser({
         email: user.email,
-        password: user.password,
+        password: securePassword,
         email_confirm: true,
       });
 
@@ -101,9 +126,26 @@ async function seedUsers() {
   }
 
   console.log("✨ Seeding complete!");
-  console.log("\n📝 Login credentials:");
-  console.log("   Coach: coach@example.com / demo123");
-  console.log("   Client: client@example.com / demo123\n");
+  console.log("\n" + "=".repeat(60));
+  console.log("🔐 SECURE DEMO CREDENTIALS (Save These Securely)");
+  console.log("=".repeat(60));
+
+  credentials.forEach(({ email, password, role }) => {
+    console.log(`\n${role.toUpperCase()}`);
+    console.log(`  Email:    ${email}`);
+    console.log(`  Password: ${password}`);
+  });
+
+  console.log("\n" + "=".repeat(60));
+  console.log("⚠️  IMPORTANT SECURITY NOTES:");
+  console.log("=".repeat(60));
+  console.log("1. Store these credentials in a secure password manager");
+  console.log("2. Delete this seed script from production");
+  console.log("3. Remove demo accounts before going live");
+  console.log("4. Change demo passwords after initial setup");
+  console.log("5. Never commit credentials to version control");
+  console.log("6. These passwords are cryptographically secure (128+ bits entropy)");
+  console.log("=".repeat(60) + "\n");
 }
 
 seedUsers().catch((error) => {
