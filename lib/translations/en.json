@@ -323,6 +323,38 @@
       "unknown": "An unexpected error occurred"
     }
   },
+  "admin": {
+    "title": "Admin Panel",
+    "database": "Database",
+    "overview": "Overview",
+    "tables": "Tables",
+    "users": "👤 Users",
+    "usersDesc": "All coaches and clients",
+    "clients": "👥 Clients",
+    "clientsDesc": "Coach-client relationships",
+    "tasks": "✅ Tasks",
+    "tasksDesc": "Tasks created by coaches",
+    "clientTasks": "📋 Client Tasks",
+    "clientTasksDesc": "Tasks assigned to clients",
+    "messages": "💬 Messages",
+    "messagesDesc": "Communication between coaches and clients",
+    "planningGroups": "🗓️ Planning Groups",
+    "planningGroupsDesc": "Year planning group management",
+    "participants": "👥 Participants",
+    "participantsDesc": "Planning group participants",
+    "ideas": "💡 Ideas",
+    "ideasDesc": "Planning ideas submitted by participants",
+    "ideaVotes": "🗳️ Idea Votes",
+    "ideaVotesDesc": "Voting data for planning ideas",
+    "events": "📅 Events",
+    "eventsDesc": "Planned events and occasions",
+    "eventParticipants": "🎫 Event Participants",
+    "eventParticipantsDesc": "Event attendance tracking",
+    "totalRecords": "Total Records",
+    "noData": "No data available",
+    "loading": "Loading...",
+    "error": "Error loading data"
+  },
   "footer": {
     "privacy": "Privacy Policy",
     "lastUpdated": "Last Updated"
